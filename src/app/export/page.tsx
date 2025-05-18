@@ -3,12 +3,14 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileText, Download, Construction } from "lucide-react";
+import { FileText, Download, Construction, UserCircle2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
+import { useAuth } from "@/contexts/auth-context";
 
 export default function ExportPage() {
   const { toast } = useToast();
+  const { user, loading } = useAuth();
 
   const handleExportClick = () => {
     toast({
@@ -16,6 +18,8 @@ export default function ExportPage() {
       description: "PDF export functionality is currently under development. Stay tuned!",
     });
   };
+
+  const userName = user?.displayName || "your";
 
   return (
     <div className="space-y-6 max-w-2xl mx-auto text-center">
@@ -25,7 +29,7 @@ export default function ExportPage() {
       </div>
       
       <p className="text-lg text-muted-foreground">
-        Securely export your comprehensive medical records as a PDF document for easy sharing with healthcare providers or for your personal records.
+        Securely export {userName} comprehensive medical records as a PDF document. This document will feature {user?.displayName ? <strong>{user.displayName}</strong> : "your name"} for easy sharing with healthcare providers or for personal records.
       </p>
 
       <Card className="shadow-lg">
@@ -38,14 +42,24 @@ export default function ExportPage() {
             className="mx-auto rounded-lg mb-4 object-cover"
             data-ai-hint="document data"
           />
-          <CardTitle className="text-2xl">Ready to Export?</CardTitle>
+          <CardTitle className="text-2xl">
+            Ready to Export{user?.displayName ? `, ${user.displayName.split(' ')[0]}?` : "?"}
+          </CardTitle>
           <CardDescription>
-            Generate a well-formatted PDF containing your medical history, visit logs, and medication list.
+            Generate a well-formatted PDF containing {userName} medical history, visit logs, and medication list.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Button size="lg" onClick={handleExportClick} className="w-full md:w-auto">
-            <Download className="mr-2 h-5 w-5" /> Export to PDF
+          <Button size="lg" onClick={handleExportClick} className="w-full md:w-auto" disabled={loading}>
+            {loading ? (
+              <>
+                <UserCircle2 className="mr-2 h-5 w-5 animate-pulse" /> Loading User Info...
+              </>
+            ) : (
+              <>
+                <Download className="mr-2 h-5 w-5" /> Export to PDF
+              </>
+            )}
           </Button>
         </CardContent>
       </Card>
