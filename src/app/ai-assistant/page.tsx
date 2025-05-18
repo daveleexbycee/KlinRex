@@ -32,7 +32,7 @@ const DoodleMIcon = ({ className }: { className?: string }) => (
     strokeLinejoin="round"
     className={`rgb-glowing-m ${className || ''}`}
   >
-    <path d="M4 18 L8 10 L12 14 L16 10 L20 18" />
+    <path d="M4 18 C5.5 12 6.5 12 8 10 C9.5 8 10.5 12 12 14 C13.5 12 14.5 8 16 10 C17.5 12 18.5 12 20 18" />
   </svg>
 );
 
@@ -273,14 +273,15 @@ export default function AIHealthAssistantPage() {
                 <CardHeader>
                   <CardTitle className="text-lg">Drug Identification</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-1">
+                <CardContent className="space-y-1 prose prose-sm max-w-none dark:prose-invert">
                   {aiResponse.drugIdentification.error ? (
                      <p className="text-destructive">{aiResponse.drugIdentification.error}</p>
                   ) : (
                     <>
                       <p><strong>Name:</strong> {aiResponse.drugIdentification.name || "N/A"}</p>
                       <p><strong>Dosage:</strong> {aiResponse.drugIdentification.dosage || "N/A"}</p>
-                      <p><strong>Purpose:</strong> {aiResponse.drugIdentification.purpose || "N/A"}</p>
+                      <p><strong>Purpose/Advice:</strong></p>
+                      <div dangerouslySetInnerHTML={{ __html: aiResponse.drugIdentification.purpose?.replace(/\n/g, '<br />') || "N/A" }} />
                       <p><strong>Confidence:</strong> {aiResponse.drugIdentification.confidence || "N/A"}</p>
                     </>
                   )}
@@ -294,9 +295,7 @@ export default function AIHealthAssistantPage() {
                   <CardTitle className="text-lg">Health Question Answer</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="prose prose-sm max-w-none dark:prose-invert">
-                    <p>{aiResponse.healthAnswer}</p>
-                  </div>
+                  <div className="prose prose-sm max-w-none dark:prose-invert" dangerouslySetInnerHTML={{ __html: aiResponse.healthAnswer.replace(/\n/g, '<br />') }} />
                 </CardContent>
               </Card>
             )}

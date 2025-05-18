@@ -26,13 +26,13 @@ export type HealthAssistantInput = z.infer<typeof HealthAssistantInputSchema>;
 const DrugIdentificationSchema = z.object({
   name: z.string().describe('The common or brand name of the drug.'),
   dosage: z.string().optional().describe('The dosage if visible or inferable (e.g., "10mg").'),
-  purpose: z.string().optional().describe('The primary medical purpose or what it is commonly used to treat.'),
+  purpose: z.string().optional().describe('A concise summary of its primary medical purpose or what it is commonly used to treat. Also, list 1-2 general, actionable pieces of advice related to its use (e.g., "take with food if stomach upset occurs", "store in a cool, dry place").'),
   confidence: z.string().optional().describe('Confidence level of identification (e.g., High, Medium, Low).'),
   error: z.string().optional().describe('Any error message if identification failed, e.g., "Not a drug" or "Could not identify".')
 });
 
 const HealthAssistantOutputSchema = z.object({
-  healthAnswer: z.string().optional().describe('The answer to the user health question.'),
+  healthAnswer: z.string().optional().describe('The summarized answer to the user health question, including actionable steps.'),
   drugIdentification: DrugIdentificationSchema.optional().describe('Details of the identified drug from the image.'),
   generalAdvice: z.string().optional().describe('A general reminder to consult healthcare professionals.'),
 });
@@ -49,6 +49,7 @@ const prompt = ai.definePrompt({
   input: {schema: HealthAssistantInputSchema},
   output: {schema: HealthAssistantOutputSchema},
   prompt: `You are a helpful AI medical assistant. Your goal is to assist users with health-related questions and identify medications from images.
+When answering health questions or describing the purpose of a drug, provide a concise summary and then list actionable, general self-care tips or steps a person might consider. Always emphasize that this is not a substitute for professional medical advice.
 
 {{#if drugImageUri}}
 A user has uploaded an image.
@@ -56,7 +57,7 @@ Image: {{media url=drugImageUri}}
 Analyze this image. If it appears to be a medication, provide the following details for the 'drugIdentification' output field:
 - name: The common or brand name of the drug.
 - dosage: The dosage if visible or inferable (e.g., "10mg"). If not clear, state "Dosage not clear".
-- purpose: The primary medical purpose or what it's commonly used to treat.
+- purpose: A concise summary of its primary medical purpose or what it's commonly used to treat. Then, list 1-2 general, actionable pieces of advice related to its use (e.g., "take with food if stomach upset occurs", "store in a cool, dry place").
 - confidence: Your confidence in this identification (High, Medium, or Low).
 If the image is not a drug, or you cannot confidently identify it, set the 'drugIdentification.error' field appropriately (e.g., "Image does not appear to be a medication." or "Could not confidently identify the drug."). Do not attempt to identify non-medical items.
 {{/if}}
@@ -64,7 +65,10 @@ If the image is not a drug, or you cannot confidently identify it, set the 'drug
 {{#if question}}
 The user has also asked the following health question:
 "{{{question}}}"
-Provide a comprehensive and informative answer to this question for the 'healthAnswer' output field. If the question is not health-related or outside your scope, politely state that you cannot answer it.
+For the 'healthAnswer' output field:
+1. Provide a concise and informative summary in response to the question.
+2. Then, list 2-4 actionable, general self-care tips or steps the user might consider related to their query (e.g., "Things you might consider:", "General self-care tips:", "When to see a doctor:").
+If the question is not health-related or outside your scope, politely state that you cannot answer it.
 {{/if}}
 
 If only a general health question is provided, focus on answering that.
