@@ -108,19 +108,24 @@ export default function AIHealthAssistantPage() {
       question: data.question,
     };
 
-    if (data.drugImage && data.drugImage.length > 0) {
+    if (data.drugImage && typeof data.drugImage.length === 'number' && data.drugImage.length > 0) {
       const file = data.drugImage[0];
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = async () => {
-        input.drugImageUri = reader.result as string;
+      if (file) { // Added explicit check for file
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = async () => {
+          input.drugImageUri = reader.result as string;
+          await fetchAIResponse(input);
+        };
+        reader.onerror = () => {
+          setError("Failed to read image file.");
+          toast({ title: "Error", description: "Failed to read image file.", variant: "destructive" });
+          setIsLoading(false);
+        };
+      } else {
+        // Fallback if file is not available, though data.drugImage.length > 0 should prevent this.
         await fetchAIResponse(input);
-      };
-      reader.onerror = () => {
-        setError("Failed to read image file.");
-        toast({ title: "Error", description: "Failed to read image file.", variant: "destructive" });
-        setIsLoading(false);
-      };
+      }
     } else {
       await fetchAIResponse(input);
     }
