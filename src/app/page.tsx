@@ -1,7 +1,7 @@
 // src/app/page.tsx
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Activity, ArrowRight, Bot, FileText, HeartPulse, Hospital, Pill } from "lucide-react";
+import { Activity, ArrowRight, FileText, HeartPulse, Hospital, Pill } from "lucide-react"; // Removed Bot
 import Link from "next/link";
 import Image from "next/image";
 
@@ -31,14 +31,14 @@ export default function DashboardPage() {
       color: "text-purple-500",
       bgColor: "bg-purple-50",
     },
-    {
-      title: "AI Assistant",
-      description: "Get help preparing for doctor appointments.",
-      icon: Bot,
-      href: "/ai-assistant",
-      color: "text-indigo-500",
-      bgColor: "bg-indigo-50",
-    },
+    // { // Removed AI Assistant from features card list
+    //   title: "AI Assistant",
+    //   description: "Get help preparing for doctor appointments.",
+    //   icon: Bot, 
+    //   href: "/ai-assistant",
+    //   color: "text-indigo-500",
+    //   bgColor: "bg-indigo-50",
+    // },
     {
       title: "Export Data",
       description: "Generate a PDF of your medical records.",
@@ -73,7 +73,7 @@ export default function DashboardPage() {
         <CardContent>
           <p className="text-foreground">
             Medrec helps you keep a comprehensive record of your health, from medical history and hospital visits to medications. 
-            Use our AI Assistant to prepare for doctor's appointments and easily export your data when needed.
+            Use our AI Assistant (via the floating button) to prepare for doctor's appointments and easily export your data when needed.
           </p>
           <Button asChild className="mt-6" size="lg">
             <Link href="/medical-history">

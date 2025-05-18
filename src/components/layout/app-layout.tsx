@@ -15,7 +15,7 @@ import {
   SidebarInset,
   SidebarFooter,
 } from '@/components/ui/sidebar';
-import { ShieldCheck, LayoutDashboard, HeartPulse, Hospital, Pill, Bot, FileText, Settings, LogOut, LogIn, UserCircle2, Loader2, Mail, KeyRound } from 'lucide-react';
+import { ShieldCheck, LayoutDashboard, HeartPulse, Hospital, Pill, FileText, Settings, LogOut, LogIn, UserCircle2, Loader2, Mail, KeyRound } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -31,14 +31,15 @@ import { ThemeToggleButton } from '@/components/theme-toggle-button';
 import { useAuth } from '@/contexts/auth-context';
 import { EmailPasswordLoginDialog } from '@/components/auth/EmailPasswordLoginDialog';
 import { EmailPasswordSignupDialog } from '@/components/auth/EmailPasswordSignupDialog';
-import { ProfileEditDialog } from '@/components/auth/ProfileEditDialog'; // Import the new dialog
+import { ProfileEditDialog } from '@/components/auth/ProfileEditDialog';
+import { FloatingAIButton } from '@/components/ai/FloatingAIButton';
 
 const navItems = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/medical-history', label: 'Medical History', icon: HeartPulse },
   { href: '/visits', label: 'Visits', icon: Hospital },
   { href: '/medications', label: 'Medications', icon: Pill },
-  { href: '/ai-assistant', label: 'AI Assistant', icon: Bot },
+  // { href: '/ai-assistant', label: 'AI Assistant', icon: Bot }, // Removed from sidebar
   { href: '/export', label: 'Export PDF', icon: FileText },
 ];
 
@@ -47,7 +48,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const { user, loading, loginWithGoogle, logout } = useAuth();
   const [isLoginDialogOpen, setIsLoginDialogOpen] = useState(false);
   const [isSignupDialogOpen, setIsSignupDialogOpen] = useState(false);
-  const [isProfileEditDialogOpen, setIsProfileEditDialogOpen] = useState(false); // State for profile edit dialog
+  const [isProfileEditDialogOpen, setIsProfileEditDialogOpen] = useState(false); 
 
   const UserProfileSection = () => {
     if (loading) {
@@ -170,8 +171,9 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           </div>
           <ThemeToggleButton />
         </header>
-        <main className="flex-1 overflow-y-auto p-6">
+        <main className="flex-1 overflow-y-auto p-6 relative"> {/* Added relative positioning for FAB context */}
           {children}
+          <FloatingAIButton />
         </main>
       </SidebarInset>
       <EmailPasswordLoginDialog open={isLoginDialogOpen} onOpenChange={setIsLoginDialogOpen} />
