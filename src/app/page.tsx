@@ -55,7 +55,7 @@ export default function DashboardPage() {
         <CardHeader className="pb-4">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div>
-              <CardTitle className="text-3xl font-bold text-primary">Welcome to MediTrack Pro!</CardTitle>
+              <CardTitle className="text-3xl font-bold text-primary">Welcome to Medrec!</CardTitle>
               <CardDescription className="text-lg text-muted-foreground mt-1">
                 Your personal health organizer. Manage your medical journey with ease.
               </CardDescription>
@@ -72,7 +72,7 @@ export default function DashboardPage() {
         </CardHeader>
         <CardContent>
           <p className="text-foreground">
-            MediTrack Pro helps you keep a comprehensive record of your health, from medical history and hospital visits to medications. 
+            Medrec helps you keep a comprehensive record of your health, from medical history and hospital visits to medications. 
             Use our AI Assistant to prepare for doctor's appointments and easily export your data when needed.
           </p>
           <Button asChild className="mt-6" size="lg">
@@ -117,7 +117,7 @@ export default function DashboardPage() {
         <CardContent>
           <p className="text-sm text-foreground">
             Regularly updating your medical information ensures you and your healthcare providers have the most accurate data, leading to better diagnoses and treatment plans. 
-            MediTrack Pro is designed to make this process simple and secure.
+            Medrec is designed to make this process simple and secure.
           </p>
         </CardContent>
       </Card>

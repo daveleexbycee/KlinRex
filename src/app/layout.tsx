@@ -16,8 +16,8 @@ const roboto_mono = Roboto_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'MediTrack Pro',
-  description: 'Organize your medical history, visits, and medications efficiently.',
+  title: 'Medrec',
+  description: 'Medrec: Your personal health organizer.',
 };
 
 export default function RootLayout({
@@ -26,7 +26,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} ${roboto_mono.variable} antialiased`}>
         <AppLayout>
           {children}

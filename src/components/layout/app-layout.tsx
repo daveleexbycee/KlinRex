@@ -18,7 +18,6 @@ import {
 import { ShieldCheck, LayoutDashboard, HeartPulse, Hospital, Pill, Bot, FileText, Settings, LogOut } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
@@ -28,6 +27,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { ThemeToggleButton } from '@/components/theme-toggle-button';
 
 const navItems = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
@@ -48,7 +48,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           <div className="flex items-center gap-3">
             <Link href="/" className="flex items-center gap-2 text-lg font-semibold text-sidebar-primary">
               <ShieldCheck className="h-7 w-7" />
-              <span>MediTrack Pro</span>
+              <span>Medrec</span>
             </Link>
             <SidebarTrigger className="ml-auto md:hidden" />
           </div>
@@ -106,6 +106,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           <div className="flex-1">
             {/* Potential breadcrumbs or page title */}
           </div>
+          <ThemeToggleButton />
         </header>
         <main className="flex-1 overflow-y-auto p-6">
           {children}
