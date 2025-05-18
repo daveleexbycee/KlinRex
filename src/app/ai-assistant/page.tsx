@@ -1,7 +1,7 @@
 // src/app/ai-assistant/page.tsx
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -10,44 +10,109 @@ import { Textarea } from "@/components/ui/textarea";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Bot, Sparkles, Loader2 } from "lucide-react";
-import { getAISuggestions } from './actions';
-import type { SmartInfoSharingAssistantInput, SmartInfoSharingAssistantOutput } from "@/ai/flows/smart-info-sharing-assistant";
+import { Bot, Sparkles, Loader2, ImageUp, HelpCircle } from "lucide-react";
+import { getAIHealthAssistance } from './actions';
+import type { HealthAssistantInput, HealthAssistantOutput } from "@/ai/flows/health-assistant";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useToast } from '@/hooks/use-toast';
+import Image from 'next/image';
+
+const MAX_FILE_SIZE_MB = 5;
+const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
+const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
 
 const aiAssistantSchema = z.object({
-  medicalHistory: z.string().min(50, "Please provide a summary of your medical history (at least 50 characters)."),
-  reasonForVisit: z.string().min(10, "Reason for visit must be at least 10 characters."),
+  question: z.string().optional(),
+  drugImage: z
+    .custom<FileList>()
+    .optional()
+    .refine(
+      (files) => !files || files.length === 0 || files?.[0]?.size <= MAX_FILE_SIZE_BYTES,
+      `Max image size is ${MAX_FILE_SIZE_MB}MB.`
+    )
+    .refine(
+      (files) => !files || files.length === 0 || ACCEPTED_IMAGE_TYPES.includes(files?.[0]?.type),
+      "Only .jpg, .jpeg, .png and .webp formats are supported."
+    ),
+}).refine(data => !!data.question || (data.drugImage && data.drugImage.length > 0), {
+  message: "Please ask a question or upload an image.",
+  path: ["question"], // You can also set path to drugImage or a general form error
 });
+
 
 type AIAssistantFormData = z.infer<typeof aiAssistantSchema>;
 
-export default function AIAssistantPage() {
+export default function AIHealthAssistantPage() {
   const [isLoading, setIsLoading] = useState(false);
-  const [suggestions, setSuggestions] = useState<string | null>(null);
+  const [aiResponse, setAiResponse] = useState<HealthAssistantOutput | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const { toast } = useToast();
 
   const form = useForm<AIAssistantFormData>({
     resolver: zodResolver(aiAssistantSchema),
     defaultValues: {
-      medicalHistory: "",
-      reasonForVisit: "",
+      question: "",
+      drugImage: undefined,
     },
   });
 
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Validate file type and size before creating preview
+      if (file.size > MAX_FILE_SIZE_BYTES) {
+        form.setError("drugImage", { type: "manual", message: `Max image size is ${MAX_FILE_SIZE_MB}MB.` });
+        setImagePreview(null);
+        event.target.value = ""; // Clear the input
+        return;
+      }
+      if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
+        form.setError("drugImage", { type: "manual", message: "Only .jpg, .jpeg, .png and .webp formats are supported." });
+        setImagePreview(null);
+        event.target.value = ""; // Clear the input
+        return;
+      }
+      form.clearErrors("drugImage");
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setImagePreview(null);
+    }
+  };
+
   const onSubmit: SubmitHandler<AIAssistantFormData> = async (data) => {
     setIsLoading(true);
-    setSuggestions(null);
+    setAiResponse(null);
     setError(null);
 
-    const input: SmartInfoSharingAssistantInput = {
-      medicalHistory: data.medicalHistory,
-      reasonForVisit: data.reasonForVisit,
+    const input: HealthAssistantInput = {
+      question: data.question,
     };
 
-    const result = await getAISuggestions(input);
+    if (data.drugImage && data.drugImage.length > 0) {
+      const file = data.drugImage[0];
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = async () => {
+        input.drugImageUri = reader.result as string;
+        await fetchAIResponse(input);
+      };
+      reader.onerror = () => {
+        setError("Failed to read image file.");
+        toast({ title: "Error", description: "Failed to read image file.", variant: "destructive" });
+        setIsLoading(false);
+      };
+    } else {
+      await fetchAIResponse(input);
+    }
+  };
+
+  const fetchAIResponse = async (input: HealthAssistantInput) => {
+    const result = await getAIHealthAssistance(input);
 
     if ('error' in result) {
       setError(result.error);
@@ -57,32 +122,32 @@ export default function AIAssistantPage() {
         variant: "destructive",
       });
     } else {
-      setSuggestions(result.suggestedInformation);
+      setAiResponse(result);
       toast({
-        title: "Suggestions Ready!",
-        description: "AI has provided information sharing suggestions.",
+        title: "AI Response Ready!",
+        description: "AI assistant has provided a response.",
       });
     }
     setIsLoading(false);
-  };
+  }
 
   return (
     <div className="space-y-6 max-w-3xl mx-auto">
       <div className="text-center">
         <h1 className="text-3xl font-bold flex items-center justify-center">
           <Bot className="mr-3 h-8 w-8 text-primary" />
-          AI Info Sharing Assistant
+          AI Health Assistant
         </h1>
         <p className="text-muted-foreground mt-2">
-          Get smart suggestions on what medical history to share with your doctor for a more efficient consultation.
+          Ask health-related questions or upload an image of a drug for identification.
         </p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Prepare for Your Appointment</CardTitle>
+          <CardTitle>Get AI Assistance</CardTitle>
           <CardDescription>
-            Enter a summary of your relevant medical history and the reason for your upcoming visit.
+            Enter your health question and/or upload a drug image.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -90,14 +155,17 @@ export default function AIAssistantPage() {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <FormField
                 control={form.control}
-                name="medicalHistory"
+                name="question"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Medical History Summary</FormLabel>
+                    <FormLabel className="flex items-center">
+                      <HelpCircle className="mr-2 h-4 w-4" />
+                      Ask a Health Question (Optional)
+                    </FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="Summarize relevant past illnesses, allergies, procedures, and current medications..."
-                        className="min-h-[150px]"
+                        placeholder="e.g., What are the common symptoms of flu? How does metformin work?"
+                        className="min-h-[100px]"
                         {...field}
                       />
                     </FormControl>
@@ -107,27 +175,60 @@ export default function AIAssistantPage() {
               />
               <FormField
                 control={form.control}
-                name="reasonForVisit"
-                render={({ field }) => (
+                name="drugImage"
+                render={({ field: { onChange, value, ...restField } }) => (
                   <FormItem>
-                    <FormLabel>Reason for Current Visit</FormLabel>
+                    <FormLabel className="flex items-center">
+                      <ImageUp className="mr-2 h-4 w-4" />
+                      Upload Drug Image (Optional)
+                    </FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., Follow-up for blood pressure, New cough symptoms" {...field} />
+                      <Input 
+                        type="file" 
+                        accept={ACCEPTED_IMAGE_TYPES.join(",")}
+                        onChange={(e) => {
+                          onChange(e.target.files); // RHF expects FileList
+                          handleImageChange(e);
+                        }}
+                        {...restField} 
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+              
+              {imagePreview && (
+                <div className="mt-4 space-y-2">
+                  <p className="text-sm font-medium">Image Preview:</p>
+                  <Image 
+                    src={imagePreview} 
+                    alt="Drug image preview" 
+                    width={200} 
+                    height={200} 
+                    className="rounded-md border object-contain max-h-48" 
+                    data-ai-hint="drug preview"
+                  />
+                  <Button variant="outline" size="sm" onClick={() => {
+                      setImagePreview(null);
+                      form.setValue("drugImage", undefined);
+                      // Reset the actual file input element if possible
+                      const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+                      if (fileInput) fileInput.value = "";
+                  }}>Remove Image</Button>
+                </div>
+              )}
+
               <Button type="submit" disabled={isLoading} className="w-full">
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Getting Suggestions...
+                    Getting Assistance...
                   </>
                 ) : (
                   <>
                     <Sparkles className="mr-2 h-4 w-4" />
-                    Get AI Suggestions
+                    Get AI Assistance
                   </>
                 )}
               </Button>
@@ -136,25 +237,64 @@ export default function AIAssistantPage() {
         </CardContent>
       </Card>
 
-      {error && (
+      {error && !isLoading && (
         <Alert variant="destructive">
           <AlertTitle>Error</AlertTitle>
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
 
-      {suggestions && (
+      {aiResponse && !isLoading && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
               <Sparkles className="mr-2 h-5 w-5 text-accent" />
-              Suggested Information to Share
+              AI Generated Response
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="prose prose-sm max-w-none dark:prose-invert bg-muted/50 p-4 rounded-md">
-              <p>{suggestions}</p>
-            </div>
+          <CardContent className="space-y-4">
+            {aiResponse.drugIdentification && (
+              <Card className="bg-muted/30">
+                <CardHeader>
+                  <CardTitle className="text-lg">Drug Identification</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-1">
+                  {aiResponse.drugIdentification.error ? (
+                     <p className="text-destructive">{aiResponse.drugIdentification.error}</p>
+                  ) : (
+                    <>
+                      <p><strong>Name:</strong> {aiResponse.drugIdentification.name || "N/A"}</p>
+                      <p><strong>Dosage:</strong> {aiResponse.drugIdentification.dosage || "N/A"}</p>
+                      <p><strong>Purpose:</strong> {aiResponse.drugIdentification.purpose || "N/A"}</p>
+                      <p><strong>Confidence:</strong> {aiResponse.drugIdentification.confidence || "N/A"}</p>
+                    </>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            {aiResponse.healthAnswer && (
+              <Card className="bg-muted/30">
+                <CardHeader>
+                  <CardTitle className="text-lg">Health Question Answer</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="prose prose-sm max-w-none dark:prose-invert">
+                    <p>{aiResponse.healthAnswer}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+            
+            {aiResponse.generalAdvice && (
+                <Alert variant="default" className="border-primary/50">
+                    <HelpCircle className="h-4 w-4 !text-primary" />
+                    <AlertTitle className="text-primary">Important Reminder</AlertTitle>
+                    <AlertDescription>
+                        {aiResponse.generalAdvice}
+                    </AlertDescription>
+                </Alert>
+            )}
           </CardContent>
         </Card>
       )}

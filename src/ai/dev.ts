@@ -1,4 +1,4 @@
 import { config } from 'dotenv';
 config();
 
-import '@/ai/flows/smart-info-sharing-assistant.ts';
+import '@/ai/flows/health-assistant.ts';
