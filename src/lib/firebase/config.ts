@@ -1,6 +1,7 @@
 // src/lib/firebase/config.ts
 import { initializeApp, getApps, type FirebaseApp } from 'firebase/app';
 import { getAuth, type Auth } from 'firebase/auth';
+import { getStorage, type FirebaseStorage } from 'firebase/storage';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -13,6 +14,7 @@ const firebaseConfig = {
 
 let app: FirebaseApp;
 let auth: Auth;
+let storage: FirebaseStorage;
 
 if (getApps().length === 0) {
   app = initializeApp(firebaseConfig);
@@ -21,5 +23,6 @@ if (getApps().length === 0) {
 }
 
 auth = getAuth(app);
+storage = getStorage(app);
 
-export { app, auth };
+export { app, auth, storage };

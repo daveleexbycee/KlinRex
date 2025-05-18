@@ -31,6 +31,7 @@ import { ThemeToggleButton } from '@/components/theme-toggle-button';
 import { useAuth } from '@/contexts/auth-context';
 import { EmailPasswordLoginDialog } from '@/components/auth/EmailPasswordLoginDialog';
 import { EmailPasswordSignupDialog } from '@/components/auth/EmailPasswordSignupDialog';
+import { ProfileEditDialog } from '@/components/auth/ProfileEditDialog'; // Import the new dialog
 
 const navItems = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
@@ -46,6 +47,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const { user, loading, loginWithGoogle, logout } = useAuth();
   const [isLoginDialogOpen, setIsLoginDialogOpen] = useState(false);
   const [isSignupDialogOpen, setIsSignupDialogOpen] = useState(false);
+  const [isProfileEditDialogOpen, setIsProfileEditDialogOpen] = useState(false); // State for profile edit dialog
 
   const UserProfileSection = () => {
     if (loading) {
@@ -79,7 +81,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           <DropdownMenuContent side="top" align="start" className="w-56">
             <DropdownMenuLabel>My Account</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem disabled>
+            <DropdownMenuItem onClick={() => setIsProfileEditDialogOpen(true)}>
               <Settings className="mr-2 h-4 w-4" />
               <span>Settings</span>
             </DropdownMenuItem>
@@ -174,6 +176,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       </SidebarInset>
       <EmailPasswordLoginDialog open={isLoginDialogOpen} onOpenChange={setIsLoginDialogOpen} />
       <EmailPasswordSignupDialog open={isSignupDialogOpen} onOpenChange={setIsSignupDialogOpen} />
+      <ProfileEditDialog open={isProfileEditDialogOpen} onOpenChange={setIsProfileEditDialogOpen} />
     </SidebarProvider>
   );
 }

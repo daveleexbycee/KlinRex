@@ -9,15 +9,22 @@ import {
   signOut,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  updateProfile,
   type User,
   type AuthError
 } from 'firebase/auth';
-import { auth } from '@/lib/firebase/config';
+import { auth, storage } from '@/lib/firebase/config';
+import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { useToast } from '@/hooks/use-toast';
 
 export interface EmailPasswordCredentials {
   email: string;
   password: string;
+}
+
+export interface UserProfileUpdateData {
+  displayName?: string;
+  photoFile?: File | null;
 }
 
 interface AuthContextType {
@@ -26,6 +33,7 @@ interface AuthContextType {
   loginWithGoogle: () => Promise<void>;
   loginWithEmailPassword: (credentials: EmailPasswordCredentials) => Promise<boolean>;
   signUpWithEmailPassword: (credentials: EmailPasswordCredentials) => Promise<boolean>;
+  updateUserProfile: (data: UserProfileUpdateData) => Promise<boolean>;
   logout: () => Promise<void>;
 }
 
@@ -47,7 +55,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const handleAuthError = (error: AuthError, defaultMessage: string) => {
     console.error("Authentication error:", error);
     let message = defaultMessage;
-    // Firebase provides more user-friendly messages for common errors
     if (error.code) {
         switch (error.code) {
             case 'auth/user-not-found':
@@ -117,6 +124,40 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const updateUserProfile = async ({ displayName, photoFile }: UserProfileUpdateData): Promise<boolean> => {
+    if (!auth.currentUser) {
+      toast({ title: "Error", description: "No user logged in.", variant: "destructive" });
+      return false;
+    }
+    setLoading(true);
+    try {
+      let photoURL = auth.currentUser.photoURL;
+      if (photoFile) {
+        const fileRef = storageRef(storage, `profile_pictures/${auth.currentUser.uid}/${photoFile.name}`);
+        await uploadBytes(fileRef, photoFile);
+        photoURL = await getDownloadURL(fileRef);
+      }
+
+      await updateProfile(auth.currentUser, {
+        displayName: displayName ?? auth.currentUser.displayName,
+        photoURL: photoURL,
+      });
+      
+      // Manually update the user state to reflect changes immediately
+      // as onAuthStateChanged might have a delay
+      setUser(auth.currentUser); 
+
+      toast({ title: "Success", description: "Profile updated successfully!" });
+      return true;
+    } catch (error) {
+      console.error("Profile update error:", error);
+      toast({ title: "Error", description: "Could not update profile. Please try again.", variant: "destructive" });
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const logout = async () => {
     setLoading(true);
     try {
@@ -130,7 +171,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, loginWithGoogle, loginWithEmailPassword, signUpWithEmailPassword, logout }}>
+    <AuthContext.Provider value={{ user, loading, loginWithGoogle, loginWithEmailPassword, signUpWithEmailPassword, updateUserProfile, logout }}>
       {children}
     </AuthContext.Provider>
   );
