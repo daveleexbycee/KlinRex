@@ -15,7 +15,7 @@ import {
   SidebarInset,
   SidebarFooter,
 } from '@/components/ui/sidebar';
-import { ShieldCheck, LayoutDashboard, HeartPulse, Hospital, Pill, Bot, FileText, Settings, LogOut } from 'lucide-react';
+import { ShieldCheck, LayoutDashboard, HeartPulse, Hospital, Pill, Bot, FileText, Settings, LogOut, LogIn, UserCircle2, Loader2 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -28,6 +28,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ThemeToggleButton } from '@/components/theme-toggle-button';
+import { useAuth } from '@/contexts/auth-context';
 
 const navItems = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
@@ -40,6 +41,64 @@ const navItems = [
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const { user, loading, loginWithGoogle, logout } = useAuth();
+
+  const UserProfileSection = () => {
+    if (loading) {
+      return (
+        <Button variant="ghost" className="flex items-center gap-3 w-full justify-start p-2 group-data-[collapsible=icon]:justify-center" disabled>
+          <Loader2 className="h-8 w-8 animate-spin" />
+          <div className="group-data-[collapsible=icon]:hidden">
+            <p className="text-sm font-medium text-sidebar-foreground">Loading...</p>
+          </div>
+        </Button>
+      );
+    }
+
+    if (user) {
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="flex items-center gap-3 w-full justify-start p-2 group-data-[collapsible=icon]:justify-center">
+              <Avatar className="h-8 w-8">
+                {user.photoURL && <AvatarImage src={user.photoURL} alt={user.displayName || 'User Avatar'} data-ai-hint="user avatar" />}
+                <AvatarFallback>
+                  {user.displayName ? user.displayName.charAt(0).toUpperCase() : <UserCircle2 />}
+                </AvatarFallback>
+              </Avatar>
+              <div className="group-data-[collapsible=icon]:hidden text-left">
+                <p className="text-sm font-medium text-sidebar-foreground truncate" title={user.displayName || "User"}>{user.displayName || "User"}</p>
+                <p className="text-xs text-muted-foreground truncate" title={user.email || ""}>{user.email}</p>
+              </div>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent side="top" align="start" className="w-56">
+            <DropdownMenuLabel>My Account</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem disabled>
+              <Settings className="mr-2 h-4 w-4" />
+              <span>Settings</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={logout}>
+              <LogOut className="mr-2 h-4 w-4" />
+              <span>Log out</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      );
+    }
+
+    return (
+      <Button 
+        variant="ghost" 
+        className="flex items-center gap-3 w-full justify-start p-2 group-data-[collapsible=icon]:justify-center"
+        onClick={loginWithGoogle}
+      >
+        <LogIn className="h-6 w-6" />
+        <span className="group-data-[collapsible=icon]:hidden text-sm font-medium text-sidebar-foreground">Login with Google</span>
+      </Button>
+    );
+  };
 
   return (
     <SidebarProvider defaultOpen>
@@ -72,32 +131,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           </SidebarMenu>
         </SidebarContent>
         <SidebarFooter className="p-4 border-t border-sidebar-border">
-           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="flex items-center gap-3 w-full justify-start p-2 group-data-[collapsible=icon]:justify-center">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src="https://placehold.co/100x100.png" alt="User Avatar" data-ai-hint="user avatar" />
-                  <AvatarFallback>U</AvatarFallback>
-                </Avatar>
-                <div className="group-data-[collapsible=icon]:hidden">
-                  <p className="text-sm font-medium text-sidebar-foreground">User Name</p>
-                  <p className="text-xs text-muted-foreground">user@example.com</p>
-                </div>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent side="top" align="start" className="w-56">
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>
-                <Settings className="mr-2 h-4 w-4" />
-                <span>Settings</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <LogOut className="mr-2 h-4 w-4" />
-                <span>Log out</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+           <UserProfileSection />
         </SidebarFooter>
       </Sidebar>
       <SidebarInset className="flex flex-col">
