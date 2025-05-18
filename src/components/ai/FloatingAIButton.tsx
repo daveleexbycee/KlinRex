@@ -3,8 +3,22 @@
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Bot } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+
+// Custom SVG "M" icon component
+const DoodleMIcon = ({ className }: { className?: string }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    strokeWidth="1.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={`rgb-glowing-m ${className || ''}`}
+  >
+    <path d="M4 18 L8 10 L12 14 L16 10 L20 18" />
+  </svg>
+);
 
 export function FloatingAIButton() {
   return (
@@ -18,13 +32,13 @@ export function FloatingAIButton() {
             className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg z-50 flex items-center justify-center"
           >
             <Link href="/ai-assistant">
-              <Bot className="h-7 w-7" />
-              <span className="sr-only">AI Assistant</span>
+              <DoodleMIcon className="h-7 w-7" />
+              <span className="sr-only">MedRec AI</span>
             </Link>
           </Button>
         </TooltipTrigger>
         <TooltipContent side="left" className="bg-primary text-primary-foreground">
-          <p>AI Assistant</p>
+          <p>MedRec AI</p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

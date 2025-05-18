@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Bot, Sparkles, Loader2, ImageUp, HelpCircle } from "lucide-react";
+import { Sparkles, Loader2, ImageUp, HelpCircle } from "lucide-react";
 import { getAIHealthAssistance } from './actions';
 import type { HealthAssistantInput, HealthAssistantOutput } from "@/ai/flows/health-assistant";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -20,6 +20,21 @@ import Image from 'next/image';
 const MAX_FILE_SIZE_MB = 5;
 const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+
+// Custom SVG "M" icon component
+const DoodleMIcon = ({ className }: { className?: string }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    strokeWidth="1.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={`rgb-glowing-m ${className || ''}`}
+  >
+    <path d="M4 18 L8 10 L12 14 L16 10 L20 18" />
+  </svg>
+);
 
 const aiAssistantSchema = z.object({
   question: z.string().optional(),
@@ -125,7 +140,7 @@ export default function AIHealthAssistantPage() {
       setAiResponse(result);
       toast({
         title: "AI Response Ready!",
-        description: "AI assistant has provided a response.",
+        description: "MedRec AI has provided a response.",
       });
     }
     setIsLoading(false);
@@ -135,11 +150,11 @@ export default function AIHealthAssistantPage() {
     <div className="space-y-6 max-w-3xl mx-auto">
       <div className="text-center">
         <h1 className="text-3xl font-bold flex items-center justify-center">
-          <Bot className="mr-3 h-8 w-8 text-primary" />
-          AI Health Assistant
+          <DoodleMIcon className="mr-3 h-8 w-8" />
+          MedRec AI
         </h1>
         <p className="text-muted-foreground mt-2">
-          Ask health-related questions or upload an image of a drug for identification.
+          Your AI-powered health assistant. Ask questions or identify drugs from images.
         </p>
       </div>
 
@@ -248,8 +263,8 @@ export default function AIHealthAssistantPage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
-              <Sparkles className="mr-2 h-5 w-5 text-accent" />
-              AI Generated Response
+              <DoodleMIcon className="mr-2 h-5 w-5" />
+              MedRec AI Response
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">

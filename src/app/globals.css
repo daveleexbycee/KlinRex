@@ -158,3 +158,19 @@ body {
   from { opacity: 1; }
   to { opacity: 0; }
 }
+
+/* RGB Glowing M logo animation */
+@keyframes rgb-glow-effect {
+  0%   { filter: drop-shadow(0 0 0.3rem #ff0000) drop-shadow(0 0 0.5rem #ff0000); stroke: #ff8080; }
+  16%  { filter: drop-shadow(0 0 0.3rem #ff7f00) drop-shadow(0 0 0.5rem #ff7f00); stroke: #ffbf80; }
+  33%  { filter: drop-shadow(0 0 0.3rem #ffff00) drop-shadow(0 0 0.5rem #ffff00); stroke: #ffff80; }
+  50%  { filter: drop-shadow(0 0 0.3rem #00ff00) drop-shadow(0 0 0.5rem #00ff00); stroke: #80ff80; }
+  66%  { filter: drop-shadow(0 0 0.3rem #0000ff) drop-shadow(0 0 0.5rem #0000ff); stroke: #8080ff; }
+  83%  { filter: drop-shadow(0 0 0.3rem #4b0082) drop-shadow(0 0 0.5rem #4b0082); stroke: #a380bf; } /* Indigo/Violet */
+  100% { filter: drop-shadow(0 0 0.3rem #ff0000) drop-shadow(0 0 0.5rem #ff0000); stroke: #ff8080; }
+}
+
+.rgb-glowing-m {
+  animation: rgb-glow-effect 5s linear infinite;
+  stroke-width: 1.5;
+}
