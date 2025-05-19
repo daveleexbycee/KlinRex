@@ -39,7 +39,6 @@ const navItems = [
   { href: '/medical-history', label: 'Medical History', icon: HeartPulse },
   { href: '/visits', label: 'Visits', icon: Hospital },
   { href: '/medications', label: 'Medications', icon: Pill },
-  // { href: '/ai-assistant', label: 'AI Assistant', icon: Bot }, // Removed from sidebar
   { href: '/export', label: 'Export PDF', icon: FileText },
 ];
 
@@ -159,7 +158,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             ))}
           </SidebarMenu>
         </SidebarContent>
-        <SidebarFooter className="p-4 border-t border-sidebar-border">
+        <SidebarFooter className="p-4 border-t border-sidebar-border flex-shrink-0">
            <UserProfileSection />
         </SidebarFooter>
       </Sidebar>
@@ -182,3 +181,4 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     </SidebarProvider>
   );
 }
+
