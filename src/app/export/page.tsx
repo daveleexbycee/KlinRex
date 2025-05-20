@@ -1,37 +1,36 @@
 // src/app/export/page.tsx
 "use client";
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileText, Download, UserCircle2, Loader2 } from "lucide-react";
+import { FileText, Download, UserCircle2, Loader2, AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
 import { useAuth } from "@/contexts/auth-context";
 import { PrintableMedicalReport } from '@/components/export/PrintableMedicalReport';
 import type { MedicalHistoryItem, VisitItem, MedicationItem } from '@/types';
-
-// Import PDF generation libraries
+import { db } from "@/lib/firebase/config";
+import { collection, getDocs, query, orderBy, Timestamp } from "firebase/firestore";
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
-// --- Sample Data for PDF Demonstration ---
-// In a real application, this data would be fetched from a backend or state management solution.
-const sampleMedicalHistory: MedicalHistoryItem[] = [
-  { id: 'mh1', type: 'Illness', description: 'Seasonal Influenza (Flu)', date: '2023-01-15', notes: 'Managed with rest, fluids, and oseltamivir. Full recovery.' },
-  { id: 'mh2', type: 'Allergy', description: 'Penicillin', date: '2010-05-20', notes: 'Causes severe skin rash (urticaria) and mild breathing difficulty. Marked as critical allergy.' },
-  { id: 'mh3', type: 'Procedure', description: 'Appendectomy', date: '2005-08-22', notes: 'Laparoscopic appendectomy due to acute appendicitis. No complications.' },
-];
-const sampleVisits: VisitItem[] = [
-  { id: 'v1', date: '2023-06-10', hospitalName: 'City General Hospital', doctorName: 'Dr. Emily White (Cardiologist)', sicknessType: 'Annual Checkup & BP Follow-up', details: 'Routine examination. Blood pressure stable. ECG normal. Advised continued medication and lifestyle management.' },
-  { id: 'v2', date: '2023-03-01', hospitalName: 'Downtown Urgent Care', doctorName: 'Dr. John Davis', sicknessType: 'Sprained Ankle', details: 'Fell during sports. X-ray confirmed moderate sprain. RICE protocol advised. Prescribed pain relief.' },
-];
-const sampleMedications: MedicationItem[] = [
-  { id: 'm1', name: 'Lisinopril', dosage: '10mg', frequency: 'Once daily in the morning', reason: 'Hypertension (High Blood Pressure)', startDate: '2022-01-01' },
-  { id: 'm2', name: 'Atorvastatin', dosage: '20mg', frequency: 'Once daily in the evening', reason: 'Hyperlipidemia (High Cholesterol)', startDate: '2022-01-01' },
-  { id: 'm3', name: 'Metformin', dosage: '500mg', frequency: 'Twice daily with meals', reason: 'Type 2 Diabetes', startDate: '2021-07-15', endDate: '2023-02-28' },
-];
-// --- End Sample Data ---
+// Helper to convert Firestore Timestamps to YYYY-MM-DD date strings or return as is
+const firestoreDateToString = (dateValue: any): string | undefined => {
+  if (!dateValue) return undefined;
+  if (dateValue instanceof Timestamp) {
+    return dateValue.toDate().toISOString().split('T')[0];
+  }
+  if (typeof dateValue === 'string') { // Already a string
+    return dateValue;
+  }
+  // If it's a Date object already (e.g. from form state before saving to FS)
+  if (dateValue instanceof Date) {
+    return dateValue.toISOString().split('T')[0];
+  }
+  return undefined; // Or handle as an error
+};
 
 
 export default function ExportPage() {
@@ -40,6 +39,68 @@ export default function ExportPage() {
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const printableReportRef = useRef<HTMLDivElement>(null);
 
+  const [medicalHistory, setMedicalHistory] = useState<MedicalHistoryItem[]>([]);
+  const [visits, setVisits] = useState<VisitItem[]>([]);
+  const [medications, setMedications] = useState<MedicationItem[]>([]);
+  const [isFetchingData, setIsFetchingData] = useState(false);
+  const [fetchError, setFetchError] = useState<string | null>(null);
+
+  const fetchDataForPdf = useCallback(async () => {
+    if (!user) {
+      setMedicalHistory([]);
+      setVisits([]);
+      setMedications([]);
+      setIsFetchingData(false);
+      return;
+    }
+
+    setIsFetchingData(true);
+    setFetchError(null);
+    try {
+      const historyCollectionRef = collection(db, "users", user.uid, "medicalHistory");
+      const historyQuery = query(historyCollectionRef, orderBy("date", "desc"));
+      const historySnapshot = await getDocs(historyQuery);
+      setMedicalHistory(historySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        date: firestoreDateToString(doc.data().date),
+      } as MedicalHistoryItem)));
+
+      const visitsCollectionRef = collection(db, "users", user.uid, "visits");
+      const visitsQuery = query(visitsCollectionRef, orderBy("date", "desc"));
+      const visitsSnapshot = await getDocs(visitsQuery);
+      setVisits(visitsSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        date: firestoreDateToString(doc.data().date)!, // Date is required for visits
+      } as VisitItem)));
+
+      const medicationsCollectionRef = collection(db, "users", user.uid, "medications");
+      const medicationsQuery = query(medicationsCollectionRef, orderBy("name", "asc"));
+      const medicationsSnapshot = await getDocs(medicationsQuery);
+      setMedications(medicationsSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        startDate: firestoreDateToString(doc.data().startDate),
+        endDate: firestoreDateToString(doc.data().endDate),
+      } as MedicationItem)));
+
+    } catch (error) {
+      console.error("Error fetching data for PDF:", error);
+      setFetchError("Failed to fetch your medical data. Please try again.");
+      toast({ title: "Error", description: "Could not fetch data for PDF.", variant: "destructive" });
+    } finally {
+      setIsFetchingData(false);
+    }
+  }, [user, toast]);
+
+  useEffect(() => {
+    if (user && !authLoading) {
+      fetchDataForPdf();
+    }
+  }, [user, authLoading, fetchDataForPdf]);
+
+
   const handleExportClick = async () => {
     if (!user && !authLoading) {
       toast({
@@ -47,6 +108,11 @@ export default function ExportPage() {
         description: "Please log in to export your medical data.",
         variant: "destructive",
       });
+      return;
+    }
+    
+    if (isFetchingData) {
+      toast({ title: "Please wait", description: "Still fetching your data.", variant: "default" });
       return;
     }
 
@@ -61,40 +127,31 @@ export default function ExportPage() {
     try {
       const element = printableReportRef.current;
       const canvas = await html2canvas(element, {
-        scale: 2, // Increase scale for better quality
+        scale: 2, 
         useCORS: true,
-        logging: false, // Disable html2canvas console logs
-        // Ensure background is captured, especially if it's white by default from component
+        logging: false,
         backgroundColor: '#ffffff', 
-        onclone: (document) => {
-          // This can be used to modify the cloned document before rendering, if needed
-          // For example, force certain styles or remove elements not wanted in PDF
-        }
       });
 
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF({
         orientation: 'portrait',
-        unit: 'pt', // points, A4 is roughly 595pt x 842pt
+        unit: 'pt', 
         format: 'a4',
       });
 
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
       
-      // Calculate the aspect ratio of the image
       const imgProps = pdf.getImageProperties(imgData);
       const imgWidth = imgProps.width;
       const imgHeight = imgProps.height;
       
-      // Calculate the ratio to fit the image within the PDF page dimensions
-      // while maintaining aspect ratio
       const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
       
       const finalImgWidth = imgWidth * ratio;
       const finalImgHeight = imgHeight * ratio;
 
-      // Add image to PDF (centered)
       const xOffset = (pdfWidth - finalImgWidth) / 2;
       const yOffset = (pdfHeight - finalImgHeight) / 2;
       
@@ -118,18 +175,18 @@ export default function ExportPage() {
   };
 
   const userName = user?.displayName || "your";
-  const isLoading = authLoading || isGeneratingPdf;
+  const isLoadingInteraction = authLoading || isGeneratingPdf || isFetchingData;
+  const noDataAvailable = !medicalHistory.length && !visits.length && !medications.length;
 
   return (
     <>
-      {/* This component is rendered for html2canvas to capture, but hidden from normal view */}
       <div className="absolute -left-full top-0 opacity-0 pointer-events-none" aria-hidden="true">
           <PrintableMedicalReport
             ref={printableReportRef}
             user={user}
-            medicalHistory={sampleMedicalHistory} // Replace with actual data
-            visits={sampleVisits}                 // Replace with actual data
-            medications={sampleMedications}       // Replace with actual data
+            medicalHistory={medicalHistory}
+            visits={visits}
+            medications={medications}
           />
       </div>
 
@@ -140,11 +197,25 @@ export default function ExportPage() {
         </div>
         
         <p className="text-lg text-muted-foreground">
-          Securely export {userName} comprehensive medical records as a PDF document. This document will feature {user?.displayName ? <strong>{user.displayName}</strong> : "your name"} for easy sharing with healthcare providers or for personal records.
+          Securely export {userName} comprehensive medical records as a PDF document. This document will feature {user?.displayName ? <strong>{user.displayName}</strong> : "your name"} and your recorded medical information.
         </p>
-        <p className="text-sm text-amber-700 dark:text-amber-500 bg-amber-50 dark:bg-amber-900/30 p-3 rounded-md border border-amber-300 dark:border-amber-700">
-          <strong>Note:</strong> The PDF currently uses sample data for demonstration. Integrating your live medical history, visits, and medication data is a planned feature.
-        </p>
+        
+        {user && !isFetchingData && !fetchError && noDataAvailable && (
+           <Alert variant="default" className="border-primary/50 text-left">
+            <AlertTriangle className="h-4 w-4 !text-primary" />
+            <AlertDescription>
+                You have no medical history, visits, or medications recorded yet. The generated PDF will be mostly empty. Start adding your health data on other pages!
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {fetchError && (
+           <Alert variant="destructive" className="text-left">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>{fetchError}</AlertDescription>
+          </Alert>
+        )}
+
 
         <Card className="shadow-lg">
           <CardHeader>
@@ -164,14 +235,22 @@ export default function ExportPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button size="lg" onClick={handleExportClick} className="w-full md:w-auto" disabled={isLoading}>
+            <Button size="lg" onClick={handleExportClick} className="w-full md:w-auto" disabled={isLoadingInteraction || !user}>
               {isGeneratingPdf ? (
                 <>
                   <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Generating PDF...
                 </>
+              ) : isFetchingData ? (
+                <>
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Loading Data...
+                </>
               ) : authLoading ? (
                 <>
                   <UserCircle2 className="mr-2 h-5 w-5 animate-pulse" /> Loading User Info...
+                </>
+              ) : !user ? (
+                 <>
+                  <UserCircle2 className="mr-2 h-5 w-5" /> Login to Export
                 </>
               ) : (
                 <>
@@ -179,6 +258,9 @@ export default function ExportPage() {
                 </>
               )}
             </Button>
+            {!user && !authLoading && (
+                 <p className="text-sm text-muted-foreground mt-2">Please log in to enable PDF export.</p>
+            )}
           </CardContent>
         </Card>
       </div>

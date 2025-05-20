@@ -1,7 +1,7 @@
 // src/components/export/PrintableMedicalReport.tsx
 "use client";
 
-import React from 'react'; // Added React import
+import React from 'react';
 import type { User } from "firebase/auth";
 import type { MedicalHistoryItem, VisitItem, MedicationItem } from "@/types";
 import { format } from "date-fns";
@@ -13,11 +13,12 @@ interface PrintableMedicalReportProps {
   medications: MedicationItem[];
 }
 
-// Helper function to format dates consistently, handling undefined dates
 const formatDateSafe = (dateString: string | undefined, dateFormat: string = "PPP") => {
   if (!dateString) return "N/A";
   try {
-    return format(new Date(dateString), dateFormat);
+    // Ensure dateString is treated as UTC to avoid timezone issues if it's just YYYY-MM-DD
+    const date = new Date(dateString.includes('T') ? dateString : `${dateString}T00:00:00Z`);
+    return format(date, dateFormat);
   } catch (e) {
     return "Invalid Date";
   }
@@ -28,24 +29,52 @@ export const PrintableMedicalReport = React.forwardRef<HTMLDivElement, Printable
   ({ user, medicalHistory, visits, medications }, ref) => {
     const reportDate = format(new Date(), "PPP p");
 
+    // Watermark configuration
+    const watermarkText = "KlinRex";
+    const watermarkElements = [];
+    const numWatermarksAcross = 4; // How many watermarks fit horizontally
+    const numWatermarksDown = 10; // How many watermarks fit vertically
+    const watermarkOpacity = 0.05; // Very subtle
+
+    for (let i = 0; i < numWatermarksDown; i++) {
+      for (let j = 0; j < numWatermarksAcross; j++) {
+        watermarkElements.push(
+          <div
+            key={`watermark-${i}-${j}`}
+            className="absolute text-neutral-400 font-bold select-none -z-10 pointer-events-none"
+            style={{
+              fontFamily: "'Inter', sans-serif",
+              fontSize: '60px', // Smaller font size for tiling
+              opacity: watermarkOpacity,
+              top: `${(i * (100 / numWatermarksDown)) + (j % 2 === 0 ? 0 : 5)}%`, // Stagger rows slightly
+              left: `${(j * (100 / numWatermarksAcross)) + (i % 2 === 0 ? 0 : 5)}%`,
+              transform: 'rotate(-30deg) translate(-50%, -50%)',
+              transformOrigin: 'center center',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {watermarkText}
+          </div>
+        );
+      }
+    }
+
+
     return (
       <div
         id="printable-report"
         ref={ref}
-        className="p-10 bg-white text-neutral-800 font-sans w-[210mm] min-h-[297mm] shadow-lg printable-report-styles relative"
+        className="p-10 bg-white text-neutral-800 font-sans w-[210mm] min-h-[297mm] shadow-lg printable-report-styles relative overflow-hidden" // Added overflow-hidden
         style={{ fontFamily: "'Inter', sans-serif" }}
       >
-        {/* Watermark */}
-        <div
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 -rotate-45 text-neutral-200 opacity-50 text-9xl font-bold select-none -z-10"
-          style={{ fontFamily: "'Inter', sans-serif", pointerEvents: 'none' }}
-        >
-          KlinRex
+        {/* Watermark Container */}
+        <div className="absolute inset-0 -z-10 pointer-events-none">
+            {watermarkElements}
         </div>
-
+        
         {/* Header */}
-        <header className="mb-8 border-b-2 border-neutral-300 pb-4">
-          <h1 className="text-4xl font-bold text-primary mb-2">Medical Report</h1>
+        <header className="mb-8 border-b-2 border-neutral-300 pb-4 relative z-0">
+          <h1 className="text-4xl font-bold text-primary mb-2" style={{color: '#4A8FE7 !important'}}>KlinRex Medical Report</h1>
           {user?.displayName && (
             <p className="text-2xl font-semibold">{user.displayName}</p>
           )}
@@ -56,8 +85,8 @@ export const PrintableMedicalReport = React.forwardRef<HTMLDivElement, Printable
         </header>
 
         {/* Sections */}
-        <section className="mb-8">
-          <h2 className="text-2xl font-semibold text-primary border-b border-neutral-300 pb-2 mb-4">
+        <section className="mb-8 relative z-0">
+          <h2 className="text-2xl font-semibold text-primary border-b border-neutral-300 pb-2 mb-4" style={{color: '#4A8FE7 !important'}}>
             Medical History
           </h2>
           {medicalHistory.length > 0 ? (
@@ -75,8 +104,8 @@ export const PrintableMedicalReport = React.forwardRef<HTMLDivElement, Printable
           )}
         </section>
 
-        <section className="mb-8">
-          <h2 className="text-2xl font-semibold text-primary border-b border-neutral-300 pb-2 mb-4">
+        <section className="mb-8 relative z-0">
+          <h2 className="text-2xl font-semibold text-primary border-b border-neutral-300 pb-2 mb-4" style={{color: '#4A8FE7 !important'}}>
             Hospital Visits
           </h2>
           {visits.length > 0 ? (
@@ -95,8 +124,8 @@ export const PrintableMedicalReport = React.forwardRef<HTMLDivElement, Printable
           )}
         </section>
 
-        <section>
-          <h2 className="text-2xl font-semibold text-primary border-b border-neutral-300 pb-2 mb-4">
+        <section className="relative z-0">
+          <h2 className="text-2xl font-semibold text-primary border-b border-neutral-300 pb-2 mb-4" style={{color: '#4A8FE7 !important'}}>
             Medications
           </h2>
           {medications.length > 0 ? (
@@ -119,8 +148,8 @@ export const PrintableMedicalReport = React.forwardRef<HTMLDivElement, Printable
           )}
         </section>
 
-        {/* Footer (optional, could add page numbers with jsPDF later if multi-page) */}
-        <footer className="mt-10 pt-4 border-t border-neutral-300 text-center text-xs text-neutral-500">
+        {/* Footer */}
+        <footer className="mt-10 pt-4 border-t border-neutral-300 text-center text-xs text-neutral-500 relative z-0">
           KlinRex - Your Personal Health Organizer
         </footer>
         <style jsx global>{`
@@ -128,7 +157,7 @@ export const PrintableMedicalReport = React.forwardRef<HTMLDivElement, Printable
           .printable-report-styles h2,
           .printable-report-styles p,
           .printable-report-styles li,
-          .printable-report-styles div {
+          .printable-report-styles div:not(.watermark-text) { /* Avoid affecting watermark text color */
             color: #333 !important; /* Force dark text for PDF */
           }
           .printable-report-styles .text-primary {
