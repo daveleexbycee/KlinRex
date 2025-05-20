@@ -101,7 +101,7 @@ export default function ExportPage() {
       pdf.addImage(imgData, 'PNG', xOffset, yOffset, finalImgWidth, finalImgHeight);
       
       const userNameForFile = user?.displayName?.replace(/\s+/g, '_') || 'User';
-      pdf.save(`Medrec_Report_${userNameForFile}.pdf`);
+      pdf.save(`KlinRex_Report_${userNameForFile}.pdf`);
 
       toast({ title: "Success!", description: "Your PDF report has been downloaded." });
 

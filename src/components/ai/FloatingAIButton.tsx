@@ -33,12 +33,12 @@ export function FloatingAIButton() {
           >
             <Link href="/ai-assistant">
               <DoodleMIcon className="h-7 w-7" />
-              <span className="sr-only">MedRec AI</span>
+              <span className="sr-only">KlinRex AI</span>
             </Link>
           </Button>
         </TooltipTrigger>
         <TooltipContent side="left" className="bg-primary text-primary-foreground">
-          <p>MedRec AI</p>
+          <p>KlinRex AI</p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

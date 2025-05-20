@@ -135,7 +135,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           <div className="flex items-center gap-3">
             <Link href="/" className="flex items-center gap-2 text-lg font-semibold text-sidebar-primary">
               <ShieldCheck className="h-7 w-7" />
-              <span>Medrec</span>
+              <span>KlinRex</span>
             </Link>
             <SidebarTrigger className="ml-auto md:hidden" />
           </div>
@@ -181,4 +181,3 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     </SidebarProvider>
   );
 }
-

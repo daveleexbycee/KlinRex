@@ -145,7 +145,7 @@ export default function AIHealthAssistantPage() {
       setAiResponse(result);
       toast({
         title: "AI Response Ready!",
-        description: "MedRec AI has provided a response.",
+        description: "KlinRex AI has provided a response.",
       });
     }
     setIsLoading(false);
@@ -156,7 +156,7 @@ export default function AIHealthAssistantPage() {
       <div className="text-center">
         <h1 className="text-3xl font-bold flex items-center justify-center">
           <DoodleMIcon className="mr-3 h-8 w-8" />
-          MedRec AI
+          KlinRex AI
         </h1>
         <p className="text-muted-foreground mt-2">
           Your AI-powered health assistant. Ask questions or identify drugs from images.
@@ -269,7 +269,7 @@ export default function AIHealthAssistantPage() {
           <CardHeader>
             <CardTitle className="flex items-center">
               <DoodleMIcon className="mr-2 h-5 w-5" />
-              MedRec AI Response
+              KlinRex AI Response
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">

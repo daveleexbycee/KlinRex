@@ -21,7 +21,7 @@ export default function DashboardPage() {
   if (showIntro) {
     return (
       <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-background overflow-hidden intro-fade-out">
-        <h1 className="text-7xl md:text-8xl font-bold text-primary animate-pulse mb-8">Medrec</h1>
+        <h1 className="text-7xl md:text-8xl font-bold text-primary animate-pulse mb-8">KlinRex</h1>
         
         {/* Floating Icons */}
         <Hospital className="absolute text-blue-500/70" style={{ top: '10%', left: '15%', width: '50px', height: '50px', animation: 'float1 20s ease-in-out infinite' }} />
@@ -80,7 +80,7 @@ export default function DashboardPage() {
         <CardHeader className="pb-4">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div>
-              <CardTitle className="text-3xl font-bold text-primary">Welcome to Medrec!</CardTitle>
+              <CardTitle className="text-3xl font-bold text-primary">Welcome to KlinRex!</CardTitle>
               <CardDescription className="text-lg text-muted-foreground mt-1">
                 Your personal health organizer. Manage your medical journey with ease.
               </CardDescription>
@@ -97,7 +97,7 @@ export default function DashboardPage() {
         </CardHeader>
         <CardContent>
           <p className="text-foreground">
-            Medrec helps you keep a comprehensive record of your health, from medical history and hospital visits to medications. 
+            KlinRex helps you keep a comprehensive record of your health, from medical history and hospital visits to medications. 
             Use our AI Assistant (via the floating button) to prepare for doctor's appointments and easily export your data when needed.
           </p>
           <Button asChild className="mt-6" size="lg">
@@ -144,7 +144,7 @@ export default function DashboardPage() {
         <CardContent>
           <p className="text-sm text-foreground">
             Regularly updating your medical information ensures you and your healthcare providers have the most accurate data, leading to better diagnoses and treatment plans. 
-            Medrec is designed to make this process simple and secure.
+            KlinRex is designed to make this process simple and secure.
           </p>
         </CardContent>
       </Card>

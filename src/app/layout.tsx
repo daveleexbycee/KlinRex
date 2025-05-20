@@ -17,8 +17,8 @@ const roboto_mono = Roboto_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Medrec',
-  description: 'Medrec: Your personal health organizer.',
+  title: 'KlinRex',
+  description: 'KlinRex: Your personal health organizer.',
 };
 
 export default function RootLayout({
