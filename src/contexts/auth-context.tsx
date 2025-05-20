@@ -10,13 +10,22 @@ import {
   signOut,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
-  updateProfile,
-  type User,
+  updateProfile as updateFirebaseAuthProfile,
+  type User as FirebaseUser, // Renamed to avoid conflict
   type AuthError
 } from 'firebase/auth';
-import { auth, storage } from '@/lib/firebase/config';
+import { auth, storage, db } from '@/lib/firebase/config';
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import { useToast } from '@/hooks/use-toast';
+
+// Extended User type
+export interface KlinRexUser extends FirebaseUser {
+  bloodGroup?: string;
+  bloodType?: string;
+  emergencyContact?: string;
+  address?: string;
+}
 
 export interface EmailPasswordCredentials {
   email: string;
@@ -26,10 +35,14 @@ export interface EmailPasswordCredentials {
 export interface UserProfileUpdateData {
   displayName?: string;
   photoFile?: File | null;
+  bloodGroup?: string;
+  bloodType?: string;
+  emergencyContact?: string;
+  address?: string;
 }
 
 interface AuthContextType {
-  user: User | null;
+  user: KlinRexUser | null;
   loading: boolean;
   loginWithGoogle: () => Promise<void>;
   loginWithEmailPassword: (credentials: EmailPasswordCredentials) => Promise<boolean>;
@@ -41,13 +54,24 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<KlinRexUser | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        // Fetch custom profile data from Firestore
+        const userProfileRef = doc(db, "userProfiles", firebaseUser.uid);
+        const userProfileSnap = await getDoc(userProfileRef);
+        let customData = {};
+        if (userProfileSnap.exists()) {
+          customData = userProfileSnap.data();
+        }
+        setUser({ ...firebaseUser, ...customData } as KlinRexUser);
+      } else {
+        setUser(null);
+      }
       setLoading(false);
     });
     return () => unsubscribe();
@@ -107,11 +131,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
+      // onAuthStateChanged will handle fetching custom data and setting user
       toast({ title: "Success", description: "Logged in successfully with Google!" });
     } catch (error) {
       handleAuthError(error as AuthError, "Could not sign in with Google. Please try again.");
     } finally {
-      setLoading(false);
+      // setLoading(false); // onAuthStateChanged will set loading to false
     }
   };
 
@@ -119,66 +144,87 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setLoading(true);
     try {
       await signInWithEmailAndPassword(auth, email, password);
+      // onAuthStateChanged will handle fetching custom data and setting user
       toast({ title: "Success", description: "Logged in successfully!" });
       return true;
     } catch (error) {
       handleAuthError(error as AuthError, "Could not sign in with email/password. Please try again.");
+      setLoading(false); // Ensure loading is false on error
       return false;
-    } finally {
-      setLoading(false);
     }
   };
 
   const signUpWithEmailPassword = async ({ email, password }: EmailPasswordCredentials): Promise<boolean> => {
     setLoading(true);
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      // Create an empty profile in Firestore for the new user
+      const userProfileRef = doc(db, "userProfiles", userCredential.user.uid);
+      await setDoc(userProfileRef, { email: userCredential.user.email }); // Store email or other initial data
+      // onAuthStateChanged will handle setting user
       toast({ title: "Success", description: "Account created and logged in successfully!" });
       return true;
     } catch (error) {
       handleAuthError(error as AuthError, "Could not create account. Please try again.");
+      setLoading(false); // Ensure loading is false on error
       return false;
-    } finally {
-      setLoading(false);
     }
   };
 
-  const updateUserProfile = async ({ displayName, photoFile }: UserProfileUpdateData): Promise<boolean> => {
-    const currentUser = auth.currentUser;
-    if (!currentUser) {
+  const updateUserProfile = async (data: UserProfileUpdateData): Promise<boolean> => {
+    const currentFirebaseUser = auth.currentUser;
+    if (!currentFirebaseUser) {
       toast({ title: "Error", description: "No user logged in.", variant: "destructive" });
       return false;
     }
     setLoading(true);
     try {
-      // Determine the displayName to be set in Firebase.
-      // If `displayName` from input is undefined, use the current user's displayName.
-      // If `displayName` from input is an empty string, it means user wants to clear it, so pass null or empty string.
-      const newDisplayName = displayName === undefined ? currentUser.displayName : displayName;
-
-      // Determine the photoURL to be set in Firebase.
-      let newPhotoURL = currentUser.photoURL; // Start with the current photoURL
+      const { displayName, photoFile, bloodGroup, bloodType, emergencyContact, address } = data;
+      
+      // Update Firebase Auth profile (displayName, photoURL)
+      const authProfileUpdates: { displayName?: string; photoURL?: string | null } = {};
+      if (displayName !== undefined) {
+        authProfileUpdates.displayName = displayName;
+      }
+      
+      let newPhotoURL = currentFirebaseUser.photoURL;
       if (photoFile) {
-        const fileRef = storageRef(storage, `profile_pictures/${currentUser.uid}/${photoFile.name}`);
+        const fileRef = storageRef(storage, `profile_pictures/${currentFirebaseUser.uid}/${photoFile.name}`);
         await uploadBytes(fileRef, photoFile);
-        newPhotoURL = await getDownloadURL(fileRef); // Get the URL of the newly uploaded file
+        newPhotoURL = await getDownloadURL(fileRef);
+        authProfileUpdates.photoURL = newPhotoURL;
       }
 
-      // Update Firebase Auth profile
-      await updateProfile(currentUser, {
-        displayName: newDisplayName,
-        photoURL: newPhotoURL,
-      });
+      if (Object.keys(authProfileUpdates).length > 0) {
+        await updateFirebaseAuthProfile(currentFirebaseUser, authProfileUpdates);
+      }
+
+      // Update custom data in Firestore
+      const userProfileRef = doc(db, "userProfiles", currentFirebaseUser.uid);
+      const customProfileDataToUpdate: Record<string, any> = {};
+      if (bloodGroup !== undefined) customProfileDataToUpdate.bloodGroup = bloodGroup;
+      if (bloodType !== undefined) customProfileDataToUpdate.bloodType = bloodType;
+      if (emergencyContact !== undefined) customProfileDataToUpdate.emergencyContact = emergencyContact;
+      if (address !== undefined) customProfileDataToUpdate.address = address;
+
+      if (Object.keys(customProfileDataToUpdate).length > 0) {
+        await setDoc(userProfileRef, customProfileDataToUpdate, { merge: true });
+      }
       
       // Manually update the local user state to reflect changes immediately
-      // because auth.currentUser might not update instantly.
       setUser(prevUser => {
-        if (!prevUser) return null; // Should not happen if currentUser was defined above
+        if (!prevUser) return null;
         return {
-          ...prevUser, // Spread all existing properties of the current user in state
-          displayName: newDisplayName, // Apply the new display name
-          photoURL: newPhotoURL,     // Apply the new photo URL
-        } as User; // Cast to User, assuming all other properties of User are still valid
+          ...prevUser,
+          // Update Firebase Auth controlled fields
+          displayName: displayName !== undefined ? displayName : prevUser.displayName,
+          photoURL: newPhotoURL !== undefined ? newPhotoURL : prevUser.photoURL,
+          // Update custom fields
+          bloodGroup: bloodGroup !== undefined ? bloodGroup : prevUser.bloodGroup,
+          bloodType: bloodType !== undefined ? bloodType : prevUser.bloodType,
+          emergencyContact: emergencyContact !== undefined ? emergencyContact : prevUser.emergencyContact,
+          address: address !== undefined ? address : prevUser.address,
+        } as KlinRexUser;
       });
 
       toast({ title: "Success", description: "Profile updated successfully!" });
@@ -196,11 +242,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setLoading(true);
     try {
       await signOut(auth);
+      // onAuthStateChanged will set user to null
       toast({ title: "Success", description: "Logged out successfully." });
     } catch (error) {
        handleAuthError(error as AuthError, "Could not sign out. Please try again.");
     } finally {
-      setLoading(false);
+      // setLoading(false); // onAuthStateChanged will set loading to false
     }
   };
 
@@ -218,5 +265,3 @@ export const useAuth = (): AuthContextType => {
   }
   return context;
 };
-
-    
