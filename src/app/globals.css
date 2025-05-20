@@ -167,7 +167,7 @@ body {
   position: relative;
   z-index: 103;
   text-align: center;
-  animation: gentleFloat 8s ease-in-out infinite, pulseGlow 3s ease-in-out infinite;
+  /* animation: gentleFloat 8s ease-in-out infinite, pulseGlow 3s ease-in-out infinite; */ /* Applied to text instead */
 }
 
 .intro-logo-text {
@@ -180,8 +180,9 @@ body {
   position: absolute; /* For stacking */
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
+  /* transform: translate(-50%, -50%); */ /* Handled by gentleFloat now */
   white-space: nowrap;
+  animation: gentleFloat 8s ease-in-out infinite, pulseGlow 3s ease-in-out infinite;
 }
 
 @media (min-width: 768px) {
@@ -238,18 +239,21 @@ body {
   to { opacity: 0; }
 }
 
-/* RGB Glowing M logo animation */
-@keyframes rgb-glow-effect {
-  0%   { filter: drop-shadow(0 0 0.3rem #ff0000) drop-shadow(0 0 0.5rem #ff0000); stroke: #ff8080; }
-  16%  { filter: drop-shadow(0 0 0.3rem #ff7f00) drop-shadow(0 0 0.5rem #ff7f00); stroke: #ffbf80; }
-  33%  { filter: drop-shadow(0 0 0.3rem #ffff00) drop-shadow(0 0 0.5rem #ffff00); stroke: #ffff80; }
-  50%  { filter: drop-shadow(0 0 0.3rem #00ff00) drop-shadow(0 0 0.5rem #00ff00); stroke: #80ff80; }
-  66%  { filter: drop-shadow(0 0 0.3rem #0000ff) drop-shadow(0 0 0.5rem #0000ff); stroke: #8080ff; }
-  83%  { filter: drop-shadow(0 0 0.3rem #4b0082) drop-shadow(0 0 0.5rem #4b0082); stroke: #a380bf; } /* Indigo/Violet */
-  100% { filter: drop-shadow(0 0 0.3rem #ff0000) drop-shadow(0 0 0.5rem #ff0000); stroke: #ff8080; }
+/* RGB Glowing Delta Sigma logo animation */
+@keyframes rgbTextGlow {
+  0%   { fill: hsl(0, 100%, 70%); filter: drop-shadow(0 0 3px hsl(0, 100%, 65%)) drop-shadow(0 0 5px hsl(0, 100%, 60%)); }
+  16%  { fill: hsl(30, 100%, 70%); filter: drop-shadow(0 0 3px hsl(30, 100%, 65%)) drop-shadow(0 0 5px hsl(30, 100%, 60%)); }
+  33%  { fill: hsl(60, 100%, 70%); filter: drop-shadow(0 0 3px hsl(60, 100%, 65%)) drop-shadow(0 0 5px hsl(60, 100%, 60%)); }
+  50%  { fill: hsl(120, 100%, 70%); filter: drop-shadow(0 0 3px hsl(120, 100%, 65%)) drop-shadow(0 0 5px hsl(120, 100%, 60%)); }
+  66%  { fill: hsl(240, 100%, 70%); filter: drop-shadow(0 0 3px hsl(240, 100%, 65%)) drop-shadow(0 0 5px hsl(240, 100%, 60%)); }
+  83%  { fill: hsl(270, 100%, 70%); filter: drop-shadow(0 0 3px hsl(270, 100%, 65%)) drop-shadow(0 0 5px hsl(270, 100%, 60%)); }
+  100% { fill: hsl(0, 100%, 70%); filter: drop-shadow(0 0 3px hsl(0, 100%, 65%)) drop-shadow(0 0 5px hsl(0, 100%, 60%)); }
 }
 
-.rgb-glowing-m {
-  animation: rgb-glow-effect 5s linear infinite;
-  stroke-width: 1.5;
+.delta-sigma-text-animated {
+  animation: rgbTextGlow 5s linear infinite;
+  font-family: 'Times New Roman', Times, serif; /* For a more distinct Greek letter look */
+  font-weight: bold;
 }
+
+    

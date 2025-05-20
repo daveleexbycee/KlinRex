@@ -1,7 +1,7 @@
 // src/app/ai-assistant/page.tsx
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -21,20 +21,25 @@ const MAX_FILE_SIZE_MB = 5;
 const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
 
-// Custom SVG "M" icon component
-const DoodleMIcon = ({ className }: { className?: string }) => (
+// Custom "ΔΣ" icon component
+const DeltaSigmaIcon = ({ className }: { className?: string }) => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 24 24"
-    fill="none"
-    strokeWidth="1.5"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={`rgb-glowing-m ${className || ''}`}
+    viewBox="0 0 40 24" // Adjusted viewBox
+    className={`delta-sigma-container ${className || ''}`}
   >
-    <path d="M4 18 C5.5 12 6.5 12 8 10 C9.5 8 10.5 12 12 14 C13.5 12 14.5 8 16 10 C17.5 12 18.5 12 20 18" />
+    <text
+      x="50%"
+      y="50%"
+      dominantBaseline="middle"
+      textAnchor="middle"
+      fontSize="18"
+      className="delta-sigma-text-animated"
+    >
+      ΔΣ
+    </text>
   </svg>
 );
+
 
 const aiAssistantSchema = z.object({
   question: z.string().optional(),
@@ -51,7 +56,7 @@ const aiAssistantSchema = z.object({
     ),
 }).refine(data => !!data.question || (data.drugImage && data.drugImage.length > 0), {
   message: "Please ask a question or upload an image.",
-  path: ["question"], // You can also set path to drugImage or a general form error
+  path: ["question"], 
 });
 
 
@@ -75,17 +80,16 @@ export default function AIHealthAssistantPage() {
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      // Validate file type and size before creating preview
       if (file.size > MAX_FILE_SIZE_BYTES) {
         form.setError("drugImage", { type: "manual", message: `Max image size is ${MAX_FILE_SIZE_MB}MB.` });
         setImagePreview(null);
-        event.target.value = ""; // Clear the input
+        event.target.value = ""; 
         return;
       }
       if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
         form.setError("drugImage", { type: "manual", message: "Only .jpg, .jpeg, .png and .webp formats are supported." });
         setImagePreview(null);
-        event.target.value = ""; // Clear the input
+        event.target.value = ""; 
         return;
       }
       form.clearErrors("drugImage");
@@ -110,7 +114,7 @@ export default function AIHealthAssistantPage() {
 
     if (data.drugImage && typeof data.drugImage.length === 'number' && data.drugImage.length > 0) {
       const file = data.drugImage[0];
-      if (file) { // Added explicit check for file
+      if (file) { 
         const reader = new FileReader();
         reader.readAsDataURL(file);
         reader.onload = async () => {
@@ -123,7 +127,6 @@ export default function AIHealthAssistantPage() {
           setIsLoading(false);
         };
       } else {
-        // Fallback if file is not available, though data.drugImage.length > 0 should prevent this.
         await fetchAIResponse(input);
       }
     } else {
@@ -155,8 +158,8 @@ export default function AIHealthAssistantPage() {
     <div className="space-y-6 max-w-3xl mx-auto">
       <div className="text-center">
         <h1 className="text-3xl font-bold flex items-center justify-center">
-          <DoodleMIcon className="mr-3 h-8 w-8" />
-          KlinRex AI
+          <DeltaSigmaIcon className="mr-3 h-8 w-8" />
+          MedRec AI
         </h1>
         <p className="text-muted-foreground mt-2">
           Your AI-powered health assistant. Ask questions or identify drugs from images.
@@ -207,7 +210,7 @@ export default function AIHealthAssistantPage() {
                         type="file" 
                         accept={ACCEPTED_IMAGE_TYPES.join(",")}
                         onChange={(e) => {
-                          onChange(e.target.files); // RHF expects FileList
+                          onChange(e.target.files); 
                           handleImageChange(e);
                         }}
                         {...restField} 
@@ -232,7 +235,6 @@ export default function AIHealthAssistantPage() {
                   <Button variant="outline" size="sm" onClick={() => {
                       setImagePreview(null);
                       form.setValue("drugImage", undefined);
-                      // Reset the actual file input element if possible
                       const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
                       if (fileInput) fileInput.value = "";
                   }}>Remove Image</Button>
@@ -268,7 +270,7 @@ export default function AIHealthAssistantPage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
-              <DoodleMIcon className="mr-2 h-5 w-5" />
+              <DeltaSigmaIcon className="mr-2 h-5 w-5" />
               KlinRex AI Response
             </CardTitle>
           </CardHeader>
@@ -320,3 +322,5 @@ export default function AIHealthAssistantPage() {
     </div>
   );
 }
+
+    
