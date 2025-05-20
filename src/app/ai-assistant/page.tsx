@@ -24,7 +24,7 @@ const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/web
 // Custom "ΔΣ" icon component
 const DeltaSigmaIcon = ({ className }: { className?: string }) => (
   <svg
-    viewBox="0 0 40 24" 
+    viewBox="0 0 40 24"
     className={`delta-sigma-container ${className || ''}`}
   >
     <text
@@ -32,8 +32,8 @@ const DeltaSigmaIcon = ({ className }: { className?: string }) => (
       y="50%"
       dominantBaseline="middle"
       textAnchor="middle"
-      fontSize="22" // Increased font size
-      className="delta-sigma-text-animated" // Class applies bold and font-family
+      fontSize="22" // Increased for bolder look
+      className="delta-sigma-text-animated"
     >
       ΔΣ
     </text>
@@ -56,7 +56,7 @@ const aiAssistantSchema = z.object({
     ),
 }).refine(data => !!data.question || (data.drugImage && data.drugImage.length > 0), {
   message: "Please ask a question or upload an image.",
-  path: ["question"], 
+  path: ["question"],
 });
 
 
@@ -83,13 +83,13 @@ export default function AIHealthAssistantPage() {
       if (file.size > MAX_FILE_SIZE_BYTES) {
         form.setError("drugImage", { type: "manual", message: `Max image size is ${MAX_FILE_SIZE_MB}MB.` });
         setImagePreview(null);
-        event.target.value = ""; 
+        event.target.value = "";
         return;
       }
       if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
         form.setError("drugImage", { type: "manual", message: "Only .jpg, .jpeg, .png and .webp formats are supported." });
         setImagePreview(null);
-        event.target.value = ""; 
+        event.target.value = "";
         return;
       }
       form.clearErrors("drugImage");
@@ -114,7 +114,7 @@ export default function AIHealthAssistantPage() {
 
     if (data.drugImage && typeof data.drugImage.length === 'number' && data.drugImage.length > 0) {
       const file = data.drugImage[0];
-      if (file) { 
+      if (file) {
         const reader = new FileReader();
         reader.readAsDataURL(file);
         reader.onload = async () => {
@@ -207,30 +207,30 @@ export default function AIHealthAssistantPage() {
                       Upload Drug Image (Optional)
                     </FormLabel>
                     <FormControl>
-                      <Input 
-                        type="file" 
+                      <Input
+                        type="file"
                         accept={ACCEPTED_IMAGE_TYPES.join(",")}
                         onChange={(e) => {
-                          onChange(e.target.files); 
+                          onChange(e.target.files);
                           handleImageChange(e);
                         }}
-                        {...restField} 
+                        {...restField}
                       />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              
+
               {imagePreview && (
                 <div className="mt-4 space-y-2">
                   <p className="text-sm font-medium">Image Preview:</p>
-                  <Image 
-                    src={imagePreview} 
-                    alt="Drug image preview" 
-                    width={200} 
-                    height={200} 
-                    className="rounded-md border object-contain max-h-48" 
+                  <Image
+                    src={imagePreview}
+                    alt="Drug image preview"
+                    width={200}
+                    height={200}
+                    className="rounded-md border object-contain max-h-48"
                     data-ai-hint="drug preview"
                   />
                   <Button variant="outline" size="sm" onClick={() => {
@@ -307,7 +307,7 @@ export default function AIHealthAssistantPage() {
                 </CardContent>
               </Card>
             )}
-            
+
             {aiResponse.generalAdvice && (
                 <Alert variant="default" className="border-primary/50">
                     <HelpCircle className="h-4 w-4 !text-primary" />
@@ -323,6 +323,3 @@ export default function AIHealthAssistantPage() {
     </div>
   );
 }
-
-    
-```
