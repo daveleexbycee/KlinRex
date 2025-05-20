@@ -14,8 +14,11 @@ const GREEK_LETTERS = ['Α', 'Β', 'Γ', 'Δ', 'Ε', 'Ζ', 'Η', 'Θ', 'Ι', 'Κ
 export default function DashboardPage() {
   const [showIntro, setShowIntro] = useState(true);
   const [introStage, setIntroStage] = useState(1); // 1 for "Ιατρικά Αρχεία", 2 for "KlinRex"
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
+    setIsClient(true); // Component has mounted on the client
+
     const introTimer = setTimeout(() => {
       setShowIntro(false);
     }, 4000); // Total intro screen duration
@@ -38,8 +41,8 @@ export default function DashboardPage() {
         <div className="intro-wave intro-wave2"></div>
         <div className="intro-wave intro-wave3"></div>
 
-        {/* Greek Letters */}
-        {GREEK_LETTERS.map((letter, index) => (
+        {/* Greek Letters - Render only on client-side */}
+        {isClient && GREEK_LETTERS.map((letter, index) => (
           <span
             key={index}
             className="intro-greek-letter"
@@ -133,7 +136,7 @@ export default function DashboardPage() {
         <CardContent>
           <p className="text-foreground">
             KlinRex helps you keep a comprehensive record of your health, from medical history and hospital visits to medications. 
-            Use our AI Assistant (via the floating button) to prepare for doctor's appointments and easily export your data when needed.
+            Use our KlinRex AI (via the floating button) to get health insights and easily export your data when needed.
           </p>
           <Button asChild className="mt-6" size="lg">
             <Link href="/medical-history">
