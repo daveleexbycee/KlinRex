@@ -1,18 +1,19 @@
+
 // src/app/export/page.tsx
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileText, Download, UserCircle2, Loader2, AlertTriangle } from "lucide-react";
+import { FileText, Download, UserCircle2, Loader2, AlertTriangle, Eye } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import Image from "next/image";
 import { useAuth } from "@/contexts/auth-context";
 import { PrintableMedicalReport } from '@/components/export/PrintableMedicalReport';
 import type { MedicalHistoryItem, VisitItem, MedicationItem } from '@/types';
 import { db } from "@/lib/firebase/config";
 import { collection, getDocs, query, orderBy, Timestamp } from "firebase/firestore";
 import jsPDF from 'jspdf';
+import type { jsPDF as jsPDFType } from 'jspdf'; // Import type for state
 import html2canvas from 'html2canvas';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
@@ -25,18 +26,19 @@ const firestoreDateToString = (dateValue: any): string | undefined => {
   if (typeof dateValue === 'string') { // Already a string
     return dateValue;
   }
-  // If it's a Date object already (e.g. from form state before saving to FS)
   if (dateValue instanceof Date) {
     return dateValue.toISOString().split('T')[0];
   }
-  return undefined; // Or handle as an error
+  return undefined; 
 };
 
 
 export default function ExportPage() {
   const { toast } = useToast();
   const { user, loading: authLoading } = useAuth();
-  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false); // Renamed from isGeneratingPdf for clarity
+  const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);
+  const [generatedPdf, setGeneratedPdf] = useState<jsPDFType | null>(null);
   const printableReportRef = useRef<HTMLDivElement>(null);
 
   const [medicalHistory, setMedicalHistory] = useState<MedicalHistoryItem[]>([]);
@@ -56,6 +58,8 @@ export default function ExportPage() {
 
     setIsFetchingData(true);
     setFetchError(null);
+    setPdfPreviewUrl(null); // Reset preview if data re-fetches
+    setGeneratedPdf(null);
     try {
       const historyCollectionRef = collection(db, "users", user.uid, "medicalHistory");
       const historyQuery = query(historyCollectionRef, orderBy("date", "desc"));
@@ -72,7 +76,7 @@ export default function ExportPage() {
       setVisits(visitsSnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
-        date: firestoreDateToString(doc.data().date)!, // Date is required for visits
+        date: firestoreDateToString(doc.data().date)!,
       } as VisitItem)));
 
       const medicationsCollectionRef = collection(db, "users", user.uid, "medications");
@@ -101,11 +105,11 @@ export default function ExportPage() {
   }, [user, authLoading, fetchDataForPdf]);
 
 
-  const handleExportClick = async () => {
+  const handleGeneratePreview = async () => {
     if (!user && !authLoading) {
       toast({
         title: "Authentication Required",
-        description: "Please log in to export your medical data.",
+        description: "Please log in to generate your medical data preview.",
         variant: "destructive",
       });
       return;
@@ -121,8 +125,10 @@ export default function ExportPage() {
         return;
     }
     
-    setIsGeneratingPdf(true);
-    toast({ title: "Generating PDF...", description: "Please wait while your report is being prepared." });
+    setIsProcessing(true);
+    setPdfPreviewUrl(null);
+    setGeneratedPdf(null);
+    toast({ title: "Generating Preview...", description: "Please wait while your report is being prepared." });
 
     try {
       const element = printableReportRef.current;
@@ -157,26 +163,37 @@ export default function ExportPage() {
       
       pdf.addImage(imgData, 'PNG', xOffset, yOffset, finalImgWidth, finalImgHeight);
       
-      const userNameForFile = user?.displayName?.replace(/\s+/g, '_') || 'User';
-      pdf.save(`KlinRex_Report_${userNameForFile}.pdf`);
+      setGeneratedPdf(pdf);
+      const dataUri = pdf.output('datauristring');
+      setPdfPreviewUrl(dataUri);
 
-      toast({ title: "Success!", description: "Your PDF report has been downloaded." });
+      toast({ title: "Preview Ready!", description: "Your PDF preview has been generated." });
 
     } catch (error) {
-      console.error("Error generating PDF:", error);
+      console.error("Error generating PDF preview:", error);
       toast({
-        title: "PDF Generation Failed",
-        description: "An error occurred while generating the PDF. Please try again.",
+        title: "Preview Generation Failed",
+        description: "An error occurred while generating the PDF preview. Please try again.",
         variant: "destructive",
       });
     } finally {
-      setIsGeneratingPdf(false);
+      setIsProcessing(false);
     }
   };
 
+  const handleDownloadPdf = () => {
+    if (!generatedPdf) {
+      toast({ title: "Error", description: "No PDF generated to download.", variant: "destructive" });
+      return;
+    }
+    const userNameForFile = user?.displayName?.replace(/\s+/g, '_') || 'User';
+    generatedPdf.save(`KlinRex_Report_${userNameForFile}.pdf`);
+    toast({ title: "Success!", description: "Your PDF report has been downloaded." });
+  };
+
   const userName = user?.displayName || "your";
-  const isLoadingInteraction = authLoading || isGeneratingPdf || isFetchingData;
-  const noDataAvailable = !medicalHistory.length && !visits.length && !medications.length;
+  const isLoadingInteraction = authLoading || isProcessing || isFetchingData;
+  const noDataAvailable = !isFetchingData && !fetchError && !medicalHistory.length && !visits.length && !medications.length;
 
   return (
     <>
@@ -190,17 +207,17 @@ export default function ExportPage() {
           />
       </div>
 
-      <div className="space-y-6 max-w-2xl mx-auto text-center">
+      <div className="space-y-6 max-w-3xl mx-auto text-center"> {/* Increased max-width for preview */}
         <div className="flex items-center justify-center mb-4">
           <FileText className="mr-3 h-10 w-10 text-primary" />
           <h1 className="text-3xl font-bold">Export Medical Data</h1>
         </div>
         
         <p className="text-lg text-muted-foreground">
-          Securely export {userName} comprehensive medical records as a PDF document. This document will feature {user?.displayName ? <strong>{user.displayName}</strong> : "your name"} and your recorded medical information.
+          Generate a preview and download {userName} comprehensive medical records as a PDF document.
         </p>
         
-        {user && !isFetchingData && !fetchError && noDataAvailable && (
+        {user && noDataAvailable && (
            <Alert variant="default" className="border-primary/50 text-left">
             <AlertTriangle className="h-4 w-4 !text-primary" />
             <AlertDescription>
@@ -216,29 +233,20 @@ export default function ExportPage() {
           </Alert>
         )}
 
-
         <Card className="shadow-lg">
           <CardHeader>
-            <Image 
-              src="https://placehold.co/600x300.png" 
-              alt="PDF Document Icon" 
-              width={300} 
-              height={150} 
-              className="mx-auto rounded-lg mb-4 object-cover"
-              data-ai-hint="document data"
-            />
             <CardTitle className="text-2xl">
-              Ready to Export{user?.displayName ? `, ${user.displayName.split(' ')[0]}?` : "?"}
+              Generate PDF Report{user?.displayName ? `, ${user.displayName.split(' ')[0]}?` : "?"}
             </CardTitle>
             <CardDescription>
-              Generate a well-formatted PDF containing {userName} medical history, visit logs, and medication list.
+              Click the button below to generate a preview of your medical report.
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <Button size="lg" onClick={handleExportClick} className="w-full md:w-auto" disabled={isLoadingInteraction || !user}>
-              {isGeneratingPdf ? (
+          <CardContent className="space-y-4">
+            <Button size="lg" onClick={handleGeneratePreview} className="w-full md:w-auto" disabled={isLoadingInteraction || !user}>
+              {isProcessing ? (
                 <>
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Generating PDF...
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Generating Preview...
                 </>
               ) : isFetchingData ? (
                 <>
@@ -250,16 +258,33 @@ export default function ExportPage() {
                 </>
               ) : !user ? (
                  <>
-                  <UserCircle2 className="mr-2 h-5 w-5" /> Login to Export
+                  <UserCircle2 className="mr-2 h-5 w-5" /> Login to Generate
                 </>
               ) : (
                 <>
-                  <Download className="mr-2 h-5 w-5" /> Export to PDF
+                  <Eye className="mr-2 h-5 w-5" /> Generate Preview
                 </>
               )}
             </Button>
             {!user && !authLoading && (
-                 <p className="text-sm text-muted-foreground mt-2">Please log in to enable PDF export.</p>
+                 <p className="text-sm text-muted-foreground mt-2">Please log in to enable PDF generation.</p>
+            )}
+
+            {pdfPreviewUrl && (
+              <div className="mt-6 border-t pt-6">
+                <h3 className="text-xl font-semibold mb-3 text-left">PDF Preview</h3>
+                <div className="rounded-md border overflow-hidden bg-muted" style={{ height: '600px' }}>
+                  <iframe
+                    src={pdfPreviewUrl}
+                    className="w-full h-full"
+                    title="PDF Preview"
+                    aria-label="PDF Preview"
+                  />
+                </div>
+                <Button size="lg" onClick={handleDownloadPdf} className="w-full md:w-auto mt-4" disabled={!generatedPdf || isProcessing}>
+                  <Download className="mr-2 h-5 w-5" /> Download PDF
+                </Button>
+              </div>
             )}
           </CardContent>
         </Card>
@@ -267,3 +292,5 @@ export default function ExportPage() {
     </>
   );
 }
+      
+    
