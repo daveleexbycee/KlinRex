@@ -15,7 +15,7 @@ import {
   SidebarInset,
   SidebarFooter,
 } from '@/components/ui/sidebar';
-import { ShieldCheck, LayoutDashboard, HeartPulse, Hospital, Pill, FileText, Settings, LogOut, LogIn, UserCircle2, Loader2, Mail, KeyRound } from 'lucide-react';
+import { ShieldCheck, LayoutDashboard, HeartPulse, Hospital, Pill, FileText, Settings, LogOut, LogIn, UserCircle2, Loader2, Mail, KeyRound, Menu } from 'lucide-react'; // Added Menu
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -137,7 +137,6 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               <ShieldCheck className="h-7 w-7" />
               <span>KlinRex</span>
             </Link>
-            {/* Removed SidebarTrigger from here as it will be in the main header */}
           </div>
         </SidebarHeader>
         <SidebarContent className="flex-1 p-4">
@@ -165,18 +164,19 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       <SidebarInset className="flex flex-col">
         <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b bg-background/80 backdrop-blur-sm px-4">
           <div className="flex items-center gap-3">
-            <SidebarTrigger /> {/* Unified trigger for mobile (hamburger) and desktop (toggle) */}
+            <SidebarTrigger>
+              <Menu className="h-6 w-6" /> {/* Changed from PanelLeft to Menu */}
+            </SidebarTrigger>
             <Link href="/" className="flex items-center gap-2 text-lg font-semibold text-primary">
               <ShieldCheck className="h-7 w-7" />
-              {/* Text only shown on sm screens and up to avoid cramping on very small mobile */}
               <span className="hidden sm:inline">KlinRex</span> 
             </Link>
           </div>
-          <div className="flex items-center"> {/* Right aligned items */}
+          <div className="flex items-center">
             <ThemeToggleButton />
           </div>
         </header>
-        <main className="flex-1 overflow-y-auto p-6 relative"> {/* Added relative positioning for FAB context */}
+        <main className="flex-1 overflow-y-auto p-6 relative">
           {children}
           <FloatingAIButton />
         </main>

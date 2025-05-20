@@ -16,8 +16,8 @@ const DeltaSigmaIcon = ({ className }: { className?: string }) => (
       y="50%"
       dominantBaseline="middle"
       textAnchor="middle"
-      fontSize="22" // Increased font size
-      className="delta-sigma-text-animated" // Class applies bold and font-family
+      fontSize="26" // Adjusted for ~1.6rem, assuming 1rem = 16px
+      className="delta-sigma-text-animated" 
     >
       ΔΣ
     </text>
@@ -37,7 +37,7 @@ export function FloatingAIButton() {
             className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg z-50 flex items-center justify-center transition-all duration-300 ease-in-out hover:shadow-[0_0_18px_4px_hsl(var(--primary)/0.4)] hover:ring-2 hover:ring-[hsl(var(--primary)/0.6)]"
           >
             <Link href="/ai-assistant">
-              <DeltaSigmaIcon className="h-7 w-7" />
+              <DeltaSigmaIcon className="h-7 w-7" /> {/* Container size, SVG text size controls actual logo */}
               <span className="sr-only">KlinRex AI</span>
             </Link>
           </Button>

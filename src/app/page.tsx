@@ -4,16 +4,22 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { Activity, ArrowRight, FileText, HeartPulse, Hospital, Pill, BriefcaseMedical } from "lucide-react";
+import { Activity, ArrowRight, FileText, HeartPulse, Hospital, Pill, BriefcaseMedical, Stethoscope, FlaskConical } from "lucide-react"; // Added more medical icons
 import Link from "next/link";
 import Image from "next/image";
 
-// Greek letters for the intro animation
-const GREEK_LETTERS = ['Α', 'Β', 'Γ', 'Δ', 'Ε', 'Ζ', 'Η', 'Θ', 'Ι', 'Κ', 'Λ', 'Μ'];
+// Medical icons for the intro animation
+const MEDICAL_ICONS = [
+  { Icon: HeartPulse, key: 'heart' },
+  { Icon: Stethoscope, key: 'stethoscope' },
+  { Icon: Pill, key: 'pill' },
+  { Icon: Hospital, key: 'hospital' },
+  { Icon: BriefcaseMedical, key: 'briefcase' },
+  { Icon: FlaskConical, key: 'flask' },
+];
 
 export default function DashboardPage() {
   const [showIntro, setShowIntro] = useState(true);
-  const [introStage, setIntroStage] = useState(1); // 1 for "Ιατρικά Αρχεία", 2 for "KlinRex"
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
@@ -23,50 +29,34 @@ export default function DashboardPage() {
       setShowIntro(false);
     }, 4000); // Total intro screen duration
 
-    const stageTimer = setTimeout(() => {
-      setIntroStage(2);
-    }, 1800); // Switch text after 1.8 seconds
-
     return () => {
       clearTimeout(introTimer);
-      clearTimeout(stageTimer);
     };
   }, []);
 
   if (showIntro) {
     return (
       <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center overflow-hidden intro-screen-klinrex intro-fade-out">
-        {/* Animated Waves */}
-        <div className="intro-wave intro-wave1"></div>
-        <div className="intro-wave intro-wave2"></div>
-        <div className="intro-wave intro-wave3"></div>
-
-        {/* Greek Letters - Render only on client-side */}
-        {isClient && GREEK_LETTERS.map((letter, index) => (
+        {/* Floating Medical Icons - Render only on client-side */}
+        {isClient && MEDICAL_ICONS.map(({ Icon, key }, index) => (
           <span
-            key={index}
-            className="intro-greek-letter"
+            key={key}
+            className="intro-medical-icon"
             style={{
-              animationDelay: `${index * 0.3}s`,
-              left: `${Math.random() * 80 + 10}%`, // Random horizontal position
-              top: `${Math.random() * 80 + 10}%`,   // Random vertical position
-              fontSize: `${Math.random() * 1.5 + 1}rem`, // Random size
+              animationDelay: `${index * 0.4}s`, // Stagger animation
+              left: `${Math.random() * 85 + 7.5}%`, // Random horizontal position
+              top: `${Math.random() * 85 + 7.5}%`,   // Random vertical position
+              fontSize: `${Math.random() * 1.2 + 1.3}rem`, // Random size
+              opacity: Math.random() * 0.3 + 0.2, // Random opacity
             }}
           >
-            {letter}
+            <Icon className="h-full w-full" />
           </span>
         ))}
 
         {/* Centerpiece Logo */}
         <div className="intro-centerpiece-logo">
-          <h1
-            className={`intro-logo-text ${introStage === 1 ? 'intro-logo-text-visible' : 'intro-logo-text-hidden'}`}
-          >
-            Ιατρικά Αρχεία
-          </h1>
-          <h1
-            className={`intro-logo-text ${introStage === 2 ? 'intro-logo-text-visible' : 'intro-logo-text-hidden'}`}
-          >
+          <h1 className="intro-logo-text intro-logo-text-visible">
             KlinRex
           </h1>
         </div>

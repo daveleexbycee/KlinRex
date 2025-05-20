@@ -108,12 +108,14 @@ body {
   }
   body {
     @apply bg-background text-foreground;
+    transition: background-color 0.5s ease; /* Smooth transition for background changes */
   }
 }
 
 /* --- KlinRex Intro Screen --- */
 .intro-screen-klinrex {
-  background: linear-gradient(180deg, hsl(220, 60%, 25%) 0%, hsl(210, 100%, 90%) 70%, hsl(0, 0%, 100%) 100%);
+  /* Deep dark blue gradient background */
+  background: linear-gradient(180deg, hsl(220, 80%, 10%) 0%, hsl(220, 70%, 20%) 50%, hsl(220, 60%, 30%) 100%);
   position: fixed;
   inset: 0;
   z-index: 100;
@@ -124,63 +126,22 @@ body {
   overflow: hidden;
 }
 
-@keyframes waveAnimation {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-.intro-wave {
-  position: absolute;
-  width: 200%; /* Wider than screen to allow horizontal movement */
-  height: 200px; /* Adjust height as needed */
-  left: -50%; /* Start off-screen to allow full movement across */
-  opacity: 0.15;
-  background-size: 50% 100px; /* Controls the "density" of waves */
-  animation: waveAnimation 20s linear infinite;
-  z-index: 101; /* Below text but above main background */
-}
-
-.intro-wave1 {
-  bottom: 0;
-  background-image: radial-gradient(ellipse at top, hsla(210, 100%, 95%, 0.5) 0%, transparent 70%);
-  animation-duration: 15s;
-}
-
-.intro-wave2 {
-  bottom: 50px; /* Staggered */
-  background-image: radial-gradient(ellipse at top, hsla(200, 100%, 85%, 0.4) 0%, transparent 70%);
-  animation-duration: 25s;
-  animation-direction: reverse;
-  opacity: 0.2;
-}
-
-.intro-wave3 {
-  bottom: -50px; /* Staggered further */
-  background-image: radial-gradient(ellipse at top, hsla(220, 100%, 75%, 0.3) 0%, transparent 70%);
-  animation-duration: 20s;
-  opacity: 0.25;
-}
-
-
 .intro-centerpiece-logo {
   position: relative;
-  z-index: 103;
+  z-index: 103; /* Above medical icons */
   text-align: center;
-  /* animation: gentleFloat 8s ease-in-out infinite, pulseGlow 3s ease-in-out infinite; */ /* Applied to text instead */
 }
 
 .intro-logo-text {
-  font-family: var(--font-roboto-mono), 'Courier New', Courier, monospace; /* Giving it a slightly more distinct font */
-  font-size: 4rem; /* Adjusted from 7xl/8xl for balance */
+  font-family: var(--font-roboto-mono), 'Courier New', Courier, monospace;
+  font-size: 4rem; 
   font-weight: bold;
   color: white;
-  text-shadow: 0 0 10px hsla(210, 100%, 70%, 0.5), 0 0 20px hsla(210, 100%, 70%, 0.3);
+  text-shadow: 0 0 10px hsla(210, 100%, 80%, 0.6), 0 0 20px hsla(210, 100%, 80%, 0.4);
   transition: opacity 0.8s ease-in-out;
-  position: absolute; /* For stacking */
+  position: absolute; /* For stacking if needed, but now only one text */
   top: 50%;
   left: 50%;
-  /* transform: translate(-50%, -50%); */ /* Handled by gentleFloat now */
   white-space: nowrap;
   animation: gentleFloat 8s ease-in-out infinite, pulseGlow 3s ease-in-out infinite;
 }
@@ -191,13 +152,11 @@ body {
   }
 }
 
-.intro-logo-text-visible {
+.intro-logo-text-visible { /* Kept for consistency, but only one text now */
   opacity: 1;
+  transform: translate(-50%, -50%); /* Center the single text */
 }
 
-.intro-logo-text-hidden {
-  opacity: 0;
-}
 
 @keyframes gentleFloat {
   0%, 100% { transform: translate(-50%, -50%) translateY(0px); }
@@ -205,26 +164,28 @@ body {
 }
 
 @keyframes pulseGlow {
-  0%, 100% { text-shadow: 0 0 8px hsla(210, 100%, 80%, 0.6), 0 0 15px hsla(210, 100%, 80%, 0.4); }
-  50% { text-shadow: 0 0 12px hsla(210, 100%, 90%, 0.8), 0 0 25px hsla(210, 100%, 90%, 0.6); }
+  0%, 100% { text-shadow: 0 0 8px hsla(210, 100%, 85%, 0.7), 0 0 15px hsla(210, 100%, 85%, 0.5); }
+  50% { text-shadow: 0 0 12px hsla(210, 100%, 95%, 0.9), 0 0 25px hsla(210, 100%, 95%, 0.7); }
 }
 
-.intro-greek-letter {
+.intro-medical-icon {
   position: absolute;
-  z-index: 102;
+  z-index: 102; /* Below main logo, above background */
   color: hsla(0, 0%, 100%, 0.25); /* Semi-transparent white */
-  font-family: 'Times New Roman', Times, serif; /* Classic Greek look */
-  animation: floatGreekLetter 15s linear infinite alternate;
-  pointer-events: none; /* They shouldn't interfere with clicks */
+  animation: floatMedicalIcon 15s linear infinite alternate;
+  pointer-events: none; 
   text-shadow: 0 0 5px hsla(0,0%,100%,0.1);
+  display: inline-block; /* To allow sizing with fontSize */
+  width: 1em; /* Ensure icon scales with font-size */
+  height: 1em;
 }
 
-@keyframes floatGreekLetter {
-  0% { transform: translate(0px, 0px) rotate(0deg) scale(1); opacity: 0.1; }
-  25% { transform: translate(10px, -15px) rotate(15deg) scale(1.05); opacity: 0.25; }
-  50% { transform: translate(-5px, 10px) rotate(-10deg) scale(1); opacity: 0.2; }
-  75% { transform: translate(15px, 5px) rotate(5deg) scale(1.1); opacity: 0.3; }
-  100% { transform: translate(0px, 0px) rotate(0deg) scale(1); opacity: 0.1; }
+@keyframes floatMedicalIcon {
+  0% { transform: translate(0px, 0px) rotate(0deg) scale(1); opacity: var(--start-opacity, 0.1); }
+  25% { transform: translate(10px, -15px) rotate(15deg) scale(1.05); opacity: calc(var(--start-opacity, 0.1) + 0.15); }
+  50% { transform: translate(-5px, 10px) rotate(-10deg) scale(1); opacity: calc(var(--start-opacity, 0.1) + 0.1); }
+  75% { transform: translate(15px, 5px) rotate(5deg) scale(1.1); opacity: calc(var(--start-opacity, 0.1) + 0.2); }
+  100% { transform: translate(0px, 0px) rotate(0deg) scale(1); opacity: var(--start-opacity, 0.1); }
 }
 
 
@@ -239,24 +200,40 @@ body {
   to { opacity: 0; }
 }
 
-/* RGB Glowing Delta Sigma logo animation - Animation part removed */
-@keyframes rgbTextGlow { /* Kept for reference but not used by delta-sigma-text-animated anymore */
-  0%   { fill: hsl(0, 100%, 70%); filter: drop-shadow(0 0 3px hsl(0, 100%, 65%)) drop-shadow(0 0 5px hsl(0, 100%, 60%)); }
-  16%  { fill: hsl(30, 100%, 70%); filter: drop-shadow(0 0 3px hsl(30, 100%, 65%)) drop-shadow(0 0 5px hsl(30, 100%, 60%)); }
-  33%  { fill: hsl(60, 100%, 70%); filter: drop-shadow(0 0 3px hsl(60, 100%, 65%)) drop-shadow(0 0 5px hsl(60, 100%, 60%)); }
-  50%  { fill: hsl(120, 100%, 70%); filter: drop-shadow(0 0 3px hsl(120, 100%, 65%)) drop-shadow(0 0 5px hsl(120, 100%, 60%)); }
-  66%  { fill: hsl(240, 100%, 70%); filter: drop-shadow(0 0 3px hsl(240, 100%, 65%)) drop-shadow(0 0 5px hsl(240, 100%, 60%)); }
-  83%  { fill: hsl(270, 100%, 70%); filter: drop-shadow(0 0 3px hsl(270, 100%, 65%)) drop-shadow(0 0 5px hsl(270, 100%, 60%)); }
-  100% { fill: hsl(0, 100%, 70%); filter: drop-shadow(0 0 3px hsl(0, 100%, 65%)) drop-shadow(0 0 5px hsl(0, 100%, 60%)); }
-}
-
 .delta-sigma-text-animated {
-  /* animation: rgbTextGlow 5s linear infinite; -- REMOVED -- */
-  font-family: 'Times New Roman', Times, serif; /* For a more distinct Greek letter look */
+  font-family: 'Times New Roman', Times, serif; 
   font-weight: bold;
-  fill: hsl(var(--foreground)); /* Use theme foreground color, or primary if on a primary background */
+  fill: hsl(var(--foreground)); 
 }
 
 .dark .delta-sigma-text-animated {
-  fill: hsl(var(--foreground)); /* Ensure dark mode compatibility */
+  fill: hsl(var(--foreground)); 
+}
+
+/* Dark mode moving gradient background */
+@keyframes animatedDarkGradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.dark body {
+  /* Define a multi-stop gradient */
+  background: linear-gradient(
+    270deg, 
+    hsl(220, 40%, 8%), /* Darker blue */
+    hsl(220, 50%, 12%), /* Mid blue */
+    hsl(240, 40%, 10%), /* Darker purple-ish blue */
+    hsl(220, 50%, 12%), /* Mid blue */
+    hsl(220, 40%, 8%)  /* Darker blue */
+  );
+  background-size: 500% 500%; /* Needs to be larger than 100% for animation to work */
+  animation: animatedDarkGradient 30s ease infinite;
+  /* Ensure text color remains readable */
+  color: hsl(var(--foreground));
+}
+
+/* Ensure default light mode background is not overridden by the dark mode body animation initially */
+body:not(.dark) {
+   background: hsl(var(--background));
 }
