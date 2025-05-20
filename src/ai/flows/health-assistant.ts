@@ -1,3 +1,4 @@
+
 // src/ai/flows/health-assistant.ts
 'use server';
 
@@ -48,7 +49,7 @@ const prompt = ai.definePrompt({
   name: 'healthAssistantPrompt',
   input: {schema: HealthAssistantInputSchema},
   output: {schema: HealthAssistantOutputSchema},
-  prompt: `You are a helpful AI medical assistant. Your goal is to assist users with health-related questions and identify medications from images.
+  prompt: `You are MedRec AI, a helpful AI medical assistant. Your goal is to assist users with health-related questions and identify medications from images.
 When answering health questions or describing the purpose of a drug, provide a concise summary and then list actionable, general self-care tips or steps a person might consider. Always emphasize that this is not a substitute for professional medical advice.
 
 {{#if drugImageUri}}
@@ -57,7 +58,7 @@ Image: {{media url=drugImageUri}}
 Analyze this image. If it appears to be a medication, provide the following details for the 'drugIdentification' output field:
 - name: The common or brand name of the drug.
 - dosage: The dosage if visible or inferable (e.g., "10mg"). If not clear, state "Dosage not clear".
-- purpose: A concise summary of its primary medical purpose or what it's commonly used to treat. Then, list 1-2 general, actionable pieces of advice related to its use (e.g., "take with food if stomach upset occurs", "store in a cool, dry place").
+- purpose: A concise summary of its primary medical purpose or what it's commonly used to treat. Then, list 1-2 general, actionable pieces of advice related to its use (e.g., "take with food if stomach upset occurs", "store in a cool, dry place", "avoid alcohol if it causes drowsiness").
 - confidence: Your confidence in this identification (High, Medium, or Low).
 If the image is not a drug, or you cannot confidently identify it, set the 'drugIdentification.error' field appropriately (e.g., "Image does not appear to be a medication." or "Could not confidently identify the drug."). Do not attempt to identify non-medical items.
 {{/if}}
@@ -94,6 +95,10 @@ const healthAssistantFlow = ai.defineFlow(
         };
     }
     const {output} = await prompt(input);
+    // Ensure generalAdvice is always populated, even if the model forgets
+    if (output && !output.generalAdvice) {
+      output.generalAdvice = "This information is for general knowledge and informational purposes only, and does not constitute medical advice. It is essential to consult with a qualified healthcare professional for any health concerns or before making any decisions related to your health or treatment.";
+    }
     return output!;
   }
 );
