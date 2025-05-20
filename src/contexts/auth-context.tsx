@@ -106,8 +106,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setLoading(true);
     try {
       const provider = new GoogleAuthProvider();
-      // You can add custom parameters if needed, e.g., to force account selection
-      // provider.setCustomParameters({ prompt: 'select_account' });
       await signInWithPopup(auth, provider);
       toast({ title: "Success", description: "Logged in successfully with Google!" });
     } catch (error) {
@@ -135,7 +133,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setLoading(true);
     try {
       await createUserWithEmailAndPassword(auth, email, password);
-      // You might want to automatically sign the user in or update their profile here
       toast({ title: "Success", description: "Account created and logged in successfully!" });
       return true;
     } catch (error) {
@@ -147,26 +144,42 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const updateUserProfile = async ({ displayName, photoFile }: UserProfileUpdateData): Promise<boolean> => {
-    if (!auth.currentUser) {
+    const currentUser = auth.currentUser;
+    if (!currentUser) {
       toast({ title: "Error", description: "No user logged in.", variant: "destructive" });
       return false;
     }
     setLoading(true);
     try {
-      let photoURL = auth.currentUser.photoURL;
+      // Determine the displayName to be set in Firebase.
+      // If `displayName` from input is undefined, use the current user's displayName.
+      // If `displayName` from input is an empty string, it means user wants to clear it, so pass null or empty string.
+      const newDisplayName = displayName === undefined ? currentUser.displayName : displayName;
+
+      // Determine the photoURL to be set in Firebase.
+      let newPhotoURL = currentUser.photoURL; // Start with the current photoURL
       if (photoFile) {
-        const fileRef = storageRef(storage, `profile_pictures/${auth.currentUser.uid}/${photoFile.name}`);
+        const fileRef = storageRef(storage, `profile_pictures/${currentUser.uid}/${photoFile.name}`);
         await uploadBytes(fileRef, photoFile);
-        photoURL = await getDownloadURL(fileRef);
+        newPhotoURL = await getDownloadURL(fileRef); // Get the URL of the newly uploaded file
       }
 
-      await updateProfile(auth.currentUser, {
-        displayName: displayName ?? auth.currentUser.displayName,
-        photoURL: photoURL,
+      // Update Firebase Auth profile
+      await updateProfile(currentUser, {
+        displayName: newDisplayName,
+        photoURL: newPhotoURL,
       });
       
-      // Manually update the user state to reflect changes immediately
-      setUser(auth.currentUser); 
+      // Manually update the local user state to reflect changes immediately
+      // because auth.currentUser might not update instantly.
+      setUser(prevUser => {
+        if (!prevUser) return null; // Should not happen if currentUser was defined above
+        return {
+          ...prevUser, // Spread all existing properties of the current user in state
+          displayName: newDisplayName, // Apply the new display name
+          photoURL: newPhotoURL,     // Apply the new photo URL
+        } as User; // Cast to User, assuming all other properties of User are still valid
+      });
 
       toast({ title: "Success", description: "Profile updated successfully!" });
       return true;
