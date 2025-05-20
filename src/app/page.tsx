@@ -4,36 +4,71 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { Activity, ArrowRight, FileText, HeartPulse, Hospital, Pill, ClipboardPlus, Stethoscope, BriefcaseMedical } from "lucide-react";
+import { Activity, ArrowRight, FileText, HeartPulse, Hospital, Pill, BriefcaseMedical } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 
+// Greek letters for the intro animation
+const GREEK_LETTERS = ['Α', 'Β', 'Γ', 'Δ', 'Ε', 'Ζ', 'Η', 'Θ', 'Ι', 'Κ', 'Λ', 'Μ'];
+
 export default function DashboardPage() {
   const [showIntro, setShowIntro] = useState(true);
+  const [introStage, setIntroStage] = useState(1); // 1 for "Ιατρικά Αρχεία", 2 for "KlinRex"
 
   useEffect(() => {
-    const timer = setTimeout(() => {
+    const introTimer = setTimeout(() => {
       setShowIntro(false);
-    }, 4000); // Intro screen duration: 4 seconds
-    return () => clearTimeout(timer);
+    }, 4000); // Total intro screen duration
+
+    const stageTimer = setTimeout(() => {
+      setIntroStage(2);
+    }, 1800); // Switch text after 1.8 seconds
+
+    return () => {
+      clearTimeout(introTimer);
+      clearTimeout(stageTimer);
+    };
   }, []);
 
   if (showIntro) {
     return (
-      <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-background overflow-hidden intro-fade-out">
-        <h1 className="text-7xl md:text-8xl font-bold text-primary animate-pulse mb-8">KlinRex</h1>
-        
-        {/* Floating Icons */}
-        <Hospital className="absolute text-blue-500/70" style={{ top: '10%', left: '15%', width: '50px', height: '50px', animation: 'float1 20s ease-in-out infinite' }} />
-        <Stethoscope className="absolute text-green-500/70" style={{ top: '20%', right: '10%', width: '45px', height: '45px', animation: 'float2 18s ease-in-out infinite' }} />
-        <HeartPulse className="absolute text-red-500/70" style={{ bottom: '15%', left: '20%', width: '50px', height: '50px', animation: 'float3 22s ease-in-out infinite' }} />
-        <ClipboardPlus className="absolute text-purple-500/70" style={{ bottom: '25%', right: '18%', width: '55px', height: '55px', animation: 'float4 19s ease-in-out infinite' }} />
-        <BriefcaseMedical className="absolute text-yellow-500/70" style={{ top: '50%', left: '5%', width: '45px', height: '45px', animation: 'float1 17s ease-in-out infinite reverse' }} />
-        <Activity className="absolute text-indigo-500/70" style={{ top: '65%', right: '8%', width: '50px', height: '50px', animation: 'float2 21s ease-in-out infinite reverse' }} />
-        <Pill className="absolute text-pink-500/70" style={{ top: '30%', left: '40%', width: '40px', height: '40px', animation: 'float3 16s ease-in-out infinite' }} />
-        <FileText className="absolute text-teal-500/70" style={{ bottom: '10%', right: '35%', width: '45px', height: '45px', animation: 'float4 23s ease-in-out infinite reverse' }} />
+      <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center overflow-hidden intro-screen-klinrex intro-fade-out">
+        {/* Animated Waves */}
+        <div className="intro-wave intro-wave1"></div>
+        <div className="intro-wave intro-wave2"></div>
+        <div className="intro-wave intro-wave3"></div>
 
-        <p className="absolute bottom-10 text-sm text-muted-foreground">Loading your health dashboard...</p>
+        {/* Greek Letters */}
+        {GREEK_LETTERS.map((letter, index) => (
+          <span
+            key={index}
+            className="intro-greek-letter"
+            style={{
+              animationDelay: `${index * 0.3}s`,
+              left: `${Math.random() * 80 + 10}%`, // Random horizontal position
+              top: `${Math.random() * 80 + 10}%`,   // Random vertical position
+              fontSize: `${Math.random() * 1.5 + 1}rem`, // Random size
+            }}
+          >
+            {letter}
+          </span>
+        ))}
+
+        {/* Centerpiece Logo */}
+        <div className="intro-centerpiece-logo">
+          <h1
+            className={`intro-logo-text ${introStage === 1 ? 'intro-logo-text-visible' : 'intro-logo-text-hidden'}`}
+          >
+            Ιατρικά Αρχεία
+          </h1>
+          <h1
+            className={`intro-logo-text ${introStage === 2 ? 'intro-logo-text-visible' : 'intro-logo-text-hidden'}`}
+          >
+            KlinRex
+          </h1>
+        </div>
+        
+        <p className="absolute bottom-10 text-sm text-white/70 font-light">Loading your health dashboard...</p>
       </div>
     );
   }
@@ -108,7 +143,7 @@ export default function DashboardPage() {
         </CardContent>
       </Card>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3"> {/* Adjusted grid for better responsiveness */}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
         {features.map((feature) => (
           <Card key={feature.title} className="hover:shadow-xl transition-shadow duration-300 flex flex-col">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
