@@ -8,7 +8,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 // Custom "ΔΣ" icon component
 const DeltaSigmaIcon = ({ className }: { className?: string }) => (
   <svg
-    viewBox="0 0 40 24" // Adjusted viewBox
+    viewBox="0 0 40 24" 
     className={`delta-sigma-container ${className || ''}`}
   >
     <text
@@ -16,8 +16,8 @@ const DeltaSigmaIcon = ({ className }: { className?: string }) => (
       y="50%"
       dominantBaseline="middle"
       textAnchor="middle"
-      fontSize="18"
-      className="delta-sigma-text-animated"
+      fontSize="22" // Increased font size
+      className="delta-sigma-text-animated" // Class applies bold and font-family
     >
       ΔΣ
     </text>
@@ -38,16 +38,14 @@ export function FloatingAIButton() {
           >
             <Link href="/ai-assistant">
               <DeltaSigmaIcon className="h-7 w-7" />
-              <span className="sr-only">MedRec AI</span>
+              <span className="sr-only">KlinRex AI</span>
             </Link>
           </Button>
         </TooltipTrigger>
         <TooltipContent side="left" className="bg-primary text-primary-foreground">
-          <p>MedRec AI</p>
+          <p>KlinRex AI</p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
   );
 }
-
-    

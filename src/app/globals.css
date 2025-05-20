@@ -239,8 +239,8 @@ body {
   to { opacity: 0; }
 }
 
-/* RGB Glowing Delta Sigma logo animation */
-@keyframes rgbTextGlow {
+/* RGB Glowing Delta Sigma logo animation - Animation part removed */
+@keyframes rgbTextGlow { /* Kept for reference but not used by delta-sigma-text-animated anymore */
   0%   { fill: hsl(0, 100%, 70%); filter: drop-shadow(0 0 3px hsl(0, 100%, 65%)) drop-shadow(0 0 5px hsl(0, 100%, 60%)); }
   16%  { fill: hsl(30, 100%, 70%); filter: drop-shadow(0 0 3px hsl(30, 100%, 65%)) drop-shadow(0 0 5px hsl(30, 100%, 60%)); }
   33%  { fill: hsl(60, 100%, 70%); filter: drop-shadow(0 0 3px hsl(60, 100%, 65%)) drop-shadow(0 0 5px hsl(60, 100%, 60%)); }
@@ -251,9 +251,12 @@ body {
 }
 
 .delta-sigma-text-animated {
-  animation: rgbTextGlow 5s linear infinite;
+  /* animation: rgbTextGlow 5s linear infinite; -- REMOVED -- */
   font-family: 'Times New Roman', Times, serif; /* For a more distinct Greek letter look */
   font-weight: bold;
+  fill: hsl(var(--foreground)); /* Use theme foreground color, or primary if on a primary background */
 }
 
-    
+.dark .delta-sigma-text-animated {
+  fill: hsl(var(--foreground)); /* Ensure dark mode compatibility */
+}

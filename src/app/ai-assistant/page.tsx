@@ -24,7 +24,7 @@ const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/web
 // Custom "ΔΣ" icon component
 const DeltaSigmaIcon = ({ className }: { className?: string }) => (
   <svg
-    viewBox="0 0 40 24" // Adjusted viewBox
+    viewBox="0 0 40 24" 
     className={`delta-sigma-container ${className || ''}`}
   >
     <text
@@ -32,8 +32,8 @@ const DeltaSigmaIcon = ({ className }: { className?: string }) => (
       y="50%"
       dominantBaseline="middle"
       textAnchor="middle"
-      fontSize="18"
-      className="delta-sigma-text-animated"
+      fontSize="22" // Increased font size
+      className="delta-sigma-text-animated" // Class applies bold and font-family
     >
       ΔΣ
     </text>
@@ -127,6 +127,7 @@ export default function AIHealthAssistantPage() {
           setIsLoading(false);
         };
       } else {
+        // This case should ideally not be hit due to form validation, but as a fallback:
         await fetchAIResponse(input);
       }
     } else {
@@ -159,7 +160,7 @@ export default function AIHealthAssistantPage() {
       <div className="text-center">
         <h1 className="text-3xl font-bold flex items-center justify-center">
           <DeltaSigmaIcon className="mr-3 h-8 w-8" />
-          MedRec AI
+          KlinRex AI
         </h1>
         <p className="text-muted-foreground mt-2">
           Your AI-powered health assistant. Ask questions or identify drugs from images.
@@ -324,3 +325,4 @@ export default function AIHealthAssistantPage() {
 }
 
     
+```
