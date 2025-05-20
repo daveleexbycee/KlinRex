@@ -1,3 +1,4 @@
+
 // src/contexts/auth-context.tsx
 "use client";
 
@@ -53,7 +54,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const handleAuthError = (error: AuthError, defaultMessage: string) => {
-    console.error("Authentication error:", error);
+    console.error("Authentication error:", error.code, error.message);
     let message = defaultMessage;
     if (error.code) {
         switch (error.code) {
@@ -64,7 +65,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 message = 'Incorrect password. Please try again.';
                 break;
             case 'auth/email-already-in-use':
-                message = 'This email address is already in use.';
+                message = 'This email address is already in use by another account.';
                 break;
             case 'auth/weak-password':
                 message = 'Password is too weak. It should be at least 6 characters.';
@@ -72,6 +73,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             case 'auth/invalid-email':
                 message = 'The email address is not valid.';
                 break;
+            case 'auth/operation-not-allowed':
+                message = 'Sign-in method is not enabled. Please check your Firebase project settings (Authentication > Sign-in method) to ensure Google Sign-In (and Email/Password) is enabled.';
+                break;
+            case 'auth/popup-closed-by-user':
+                message = 'Google Sign-In popup was closed before completing. Please try again.';
+                break;
+            case 'auth/popup-blocked':
+                message = 'Google Sign-In popup was blocked by the browser. Please check your browser settings and disable any popup blockers for this site.';
+                break;
+            case 'auth/cancelled-popup-request':
+                 message = 'Google Sign-In was cancelled. Please try again.';
+                 break;
+            case 'auth/network-request-failed':
+                 message = 'A network error occurred. Please check your internet connection and try again.';
+                 break;
+            case 'auth/unauthorized-domain':
+                 message = 'This domain is not authorized for OAuth operations for your Firebase project. Check your Firebase console authorized domains.';
+                 break;
             default:
                 message = error.message || defaultMessage;
         }
@@ -87,6 +106,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setLoading(true);
     try {
       const provider = new GoogleAuthProvider();
+      // You can add custom parameters if needed, e.g., to force account selection
+      // provider.setCustomParameters({ prompt: 'select_account' });
       await signInWithPopup(auth, provider);
       toast({ title: "Success", description: "Logged in successfully with Google!" });
     } catch (error) {
@@ -114,6 +135,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setLoading(true);
     try {
       await createUserWithEmailAndPassword(auth, email, password);
+      // You might want to automatically sign the user in or update their profile here
       toast({ title: "Success", description: "Account created and logged in successfully!" });
       return true;
     } catch (error) {
@@ -144,7 +166,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       });
       
       // Manually update the user state to reflect changes immediately
-      // as onAuthStateChanged might have a delay
       setUser(auth.currentUser); 
 
       toast({ title: "Success", description: "Profile updated successfully!" });
@@ -184,3 +205,5 @@ export const useAuth = (): AuthContextType => {
   }
   return context;
 };
+
+    
