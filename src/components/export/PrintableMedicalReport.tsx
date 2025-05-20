@@ -1,6 +1,7 @@
 // src/components/export/PrintableMedicalReport.tsx
 "use client";
 
+import React from 'react'; // Added React import
 import type { User } from "firebase/auth";
 import type { MedicalHistoryItem, VisitItem, MedicationItem } from "@/types";
 import { format } from "date-fns";
@@ -159,4 +160,3 @@ export const PrintableMedicalReport = React.forwardRef<HTMLDivElement, Printable
   }
 );
 PrintableMedicalReport.displayName = 'PrintableMedicalReport';
-
