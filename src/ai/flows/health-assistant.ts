@@ -27,13 +27,13 @@ export type HealthAssistantInput = z.infer<typeof HealthAssistantInputSchema>;
 const DrugIdentificationSchema = z.object({
   name: z.string().describe('The common or brand name of the drug.'),
   dosage: z.string().optional().describe('The dosage if visible or inferable (e.g., "10mg").'),
-  purpose: z.string().optional().describe('A concise summary of its primary medical purpose or what it is commonly used to treat. Also, list 1-2 general, actionable pieces of advice related to its use (e.g., "take with food if stomach upset occurs", "store in a cool, dry place").'),
+  purpose: z.string().optional().describe('A concise summary of its primary medical purpose or what it is commonly used to treat. Also, list 1-2 general, actionable pieces of advice related to its use (e.g., "take with food if stomach upset occurs", "store in a cool, dry place"). May also mention types of official drug information websites for more details.'),
   confidence: z.string().optional().describe('Confidence level of identification (e.g., High, Medium, Low).'),
   error: z.string().optional().describe('Any error message if identification failed, e.g., "Not a drug" or "Could not identify".')
 });
 
 const HealthAssistantOutputSchema = z.object({
-  healthAnswer: z.string().optional().describe('The summarized answer to the user health question, including actionable steps.'),
+  healthAnswer: z.string().optional().describe('The summarized answer to the user health question, including actionable steps and potentially reputable general health websites for more information.'),
   drugIdentification: DrugIdentificationSchema.optional().describe('Details of the identified drug from the image.'),
   generalAdvice: z.string().optional().describe('A general reminder to consult healthcare professionals.'),
 });
@@ -59,7 +59,7 @@ Image: {{media url=drugImageUri}}
 Analyze this image. If it appears to be a medication, provide the following details for the 'drugIdentification' output field:
 - name: The common or brand name of the drug.
 - dosage: The dosage if visible or inferable (e.g., "10mg"). If not clear, state "Dosage not clear".
-- purpose: A brief summary (1-2 sentences) of its primary medical purpose or what it's commonly used to treat. Then, list 1-2 general, actionable pieces of advice related to its use (e.g., "take with food if stomach upset occurs", "store in a cool, dry place", "avoid alcohol if it causes drowsiness").
+- purpose: A brief summary (1-2 sentences) of its primary medical purpose or what it's commonly used to treat. Then, list 1-2 general, actionable pieces of advice related to its use (e.g., "take with food if stomach upset occurs", "store in a cool, dry place", "avoid alcohol if it causes drowsiness"). You may also briefly mention that users can consult official drug information websites or their healthcare provider for more details.
 - confidence: Your confidence in this identification (High, Medium, or Low).
 If the image is not a drug, or you cannot confidently identify it, set the 'drugIdentification.error' field appropriately (e.g., "Image does not appear to be a medication." or "Could not confidently identify the drug."). Do not attempt to identify non-medical items.
 {{/if}}
@@ -70,6 +70,7 @@ The user has also asked the following health question:
 For the 'healthAnswer' output field:
 1. Provide a brief and informative summary (1-3 sentences maximum) in response to the question.
 2. Then, list 2-4 actionable, general self-care tips or steps the user might consider related to their query (e.g., "Things you might consider:", "General self-care tips:", "When to see a doctor:").
+3. After these tips, if relevant to the query, you may suggest 1-2 reputable general health websites (e.g., WebMD, Mayo Clinic, National Institutes of Health - NIH, or official government health portals) where users can find more comprehensive information or look for healthcare providers. Do not recommend specific individual doctors, clinics, or commercial services. Frame these as general resources for further research.
 If the question is not health-related or outside your scope, politely state that you cannot answer it.
 {{/if}}
 
