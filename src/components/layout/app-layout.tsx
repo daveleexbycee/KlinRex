@@ -1,3 +1,4 @@
+
 // src/components/layout/app-layout.tsx
 "use client";
 
@@ -14,9 +15,9 @@ import {
   SidebarMenuButton,
   SidebarInset,
   SidebarFooter,
-  useSidebar, // Import useSidebar
+  useSidebar,
 } from '@/components/ui/sidebar';
-import { ShieldCheck, LayoutDashboard, HeartPulse, Hospital, Pill, FileText, Settings, LogOut, LogIn, UserCircle2, Loader2, Mail, KeyRound, Menu } from 'lucide-react';
+import { ShieldCheck, LayoutDashboard, HeartPulse, Hospital, Pill, FileText, Settings, LogOut, LogIn, UserCircle2, Loader2, Mail, KeyRound, Menu, Sun, Moon } from 'lucide-react';
 import { SheetTitle } from '@/components/ui/sheet';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -44,9 +45,8 @@ const navItems = [
   { href: '/export', label: 'Export PDF', icon: FileText },
 ];
 
-// New internal component to handle conditional rendering of brand name
 const AppBrand = () => {
-  const { isMobile } = useSidebar(); // Get isMobile from Sidebar context
+  const { isMobile } = useSidebar();
   const brandClasses = "p-0 m-0 text-lg font-semibold text-sidebar-primary group-data-[collapsible=icon]:hidden";
 
   if (isMobile) {
@@ -98,6 +98,14 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               <Settings className="mr-2 h-4 w-4" />
               <span>Settings</span>
             </DropdownMenuItem>
+            <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="flex justify-between items-center">
+              <div className="flex items-center">
+                {/* We need to get current theme to show correct icon here, or let ThemeToggleButton handle icon */}
+                {/* For simplicity, ThemeToggleButton will show its own icon */}
+                <span className="mr-2">Theme</span>
+              </div>
+              <ThemeToggleButton />
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={logout}>
               <LogOut className="mr-2 h-4 w-4" />
               <span>Log out</span>
@@ -131,11 +139,17 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             <Mail className="mr-2 h-4 w-4" />
             <span>Sign in with Email</span>
           </DropdownMenuItem>
-          <DropdownMenuSeparator />
           <DropdownMenuItem onClick={() => setIsSignupDialogOpen(true)}>
             <KeyRound className="mr-2 h-4 w-4" />
             <span>Sign up with Email</span>
           </DropdownMenuItem>
+          <DropdownMenuSeparator />
+           <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="flex justify-between items-center">
+             <div className="flex items-center">
+                <span className="mr-2">Theme</span>
+              </div>
+              <ThemeToggleButton />
+            </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     );
@@ -148,7 +162,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           <div className="flex items-center gap-3">
             <Link href="/" className="flex items-center gap-2 text-lg font-semibold text-sidebar-primary">
               <ShieldCheck className="h-7 w-7" />
-              <AppBrand /> {/* Use the new AppBrand component here */}
+              <AppBrand />
             </Link>
           </div>
         </SidebarHeader>
@@ -185,9 +199,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               <span className="hidden sm:inline">KlinRex</span> 
             </Link>
           </div>
-          <div className="flex items-center">
-            <ThemeToggleButton />
-          </div>
+          {/* ThemeToggleButton removed from here */}
         </header>
         <main className="flex-1 overflow-y-auto p-6 relative">
           {children}
