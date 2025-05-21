@@ -1,7 +1,7 @@
 // src/app/ai-assistant/page.tsx
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Sparkles, Loader2, ImageUp, HelpCircle } from "lucide-react";
+import { Sparkles, Loader2, ImageUp, HelpCircle, Mic, MicOff } from "lucide-react";
 import { getAIHealthAssistance } from './actions';
 import type { HealthAssistantInput, HealthAssistantOutput } from "@/ai/flows/health-assistant";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -32,7 +32,7 @@ const DeltaSigmaIcon = ({ className }: { className?: string }) => (
       y="50%"
       dominantBaseline="middle"
       textAnchor="middle"
-      fontSize="22" // Increased for bolder look
+      fontSize="22" 
       className="delta-sigma-text-animated"
     >
       ΔΣ
@@ -56,7 +56,7 @@ const aiAssistantSchema = z.object({
     ),
 }).refine(data => !!data.question || (data.drugImage && data.drugImage.length > 0), {
   message: "Please ask a question or upload an image.",
-  path: ["question"],
+  path: ["question"], // Attach general error to a field for display if needed
 });
 
 
@@ -69,6 +69,11 @@ export default function AIHealthAssistantPage() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const { toast } = useToast();
 
+  const [isListening, setIsListening] = useState(false);
+  const [speechApiSupported, setSpeechApiSupported] = useState(false);
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
+
+
   const form = useForm<AIAssistantFormData>({
     resolver: zodResolver(aiAssistantSchema),
     defaultValues: {
@@ -77,13 +82,99 @@ export default function AIHealthAssistantPage() {
     },
   });
 
+  useEffect(() => {
+    const SpeechRecognitionAPI = window.SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (SpeechRecognitionAPI) {
+      setSpeechApiSupported(true);
+      const recognitionInstance = new SpeechRecognitionAPI();
+      recognitionInstance.continuous = false;
+      recognitionInstance.interimResults = false;
+      recognitionInstance.lang = 'en-US';
+
+      recognitionInstance.onstart = () => {
+        setIsListening(true);
+        toast({ title: "Listening...", description: "Speak now." });
+      };
+
+      recognitionInstance.onresult = (event) => {
+        const last = event.results.length - 1;
+        const transcript = event.results[last][0].transcript;
+        const currentQuestion = form.getValues("question") || "";
+        form.setValue("question", (currentQuestion ? currentQuestion + " " : "") + transcript);
+        // Auto-focus on textarea might be good here, but can be tricky
+      };
+
+      recognitionInstance.onerror = (event: SpeechRecognitionErrorEvent) => {
+        console.error("Speech recognition error", event.error);
+        let errorMessage = "Speech recognition error: " + event.error;
+        if (event.error === 'no-speech') {
+          errorMessage = "No speech was detected. Please try again.";
+        } else if (event.error === 'audio-capture') {
+          errorMessage = "Audio capture failed. Ensure your microphone is working and permissions are granted.";
+        } else if (event.error === 'not-allowed') {
+          errorMessage = "Microphone access denied. Please enable microphone permissions in your browser settings for this site.";
+        } else if (event.error === 'aborted') {
+          errorMessage = "Speech recognition aborted. Please try again.";
+        }
+        toast({ title: "Voice Input Error", description: errorMessage, variant: "destructive" });
+        setIsListening(false);
+      };
+
+      recognitionInstance.onend = () => {
+        setIsListening(false);
+        // Consider if a "Stopped listening" toast is needed or too noisy.
+      };
+      recognitionRef.current = recognitionInstance;
+    } else {
+      setSpeechApiSupported(false);
+      console.warn("Speech Recognition API not supported by this browser.");
+    }
+
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.abort();
+      }
+    };
+  }, [form, toast]);
+
+
+  const toggleListening = () => {
+    if (!speechApiSupported) {
+      toast({
+        title: "Feature Not Supported",
+        description: "Voice input is not supported by your browser.",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (!recognitionRef.current) return;
+
+    if (isListening) {
+      recognitionRef.current.stop();
+    } else {
+      try {
+        recognitionRef.current.start();
+      } catch (err) {
+        console.error("Error starting speech recognition:", err);
+        // This handles cases where start() might be called invalidly (e.g., too soon after stop)
+        if ((err as DOMException).name === 'InvalidStateError') {
+             toast({ title: "Voice Input Error", description: "Could not start voice input yet. Please wait a moment and try again.", variant: "destructive" });
+        } else {
+             toast({ title: "Voice Input Error", description: "Could not start voice input. Please check permissions and try again.", variant: "destructive" });
+        }
+        setIsListening(false); 
+      }
+    }
+  };
+
+
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       if (file.size > MAX_FILE_SIZE_BYTES) {
         form.setError("drugImage", { type: "manual", message: `Max image size is ${MAX_FILE_SIZE_MB}MB.` });
         setImagePreview(null);
-        event.target.value = "";
+        event.target.value = ""; 
         return;
       }
       if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
@@ -114,7 +205,7 @@ export default function AIHealthAssistantPage() {
 
     if (data.drugImage && typeof data.drugImage.length === 'number' && data.drugImage.length > 0) {
       const file = data.drugImage[0];
-      if (file) {
+      if (file) { // Extra check, though form validation should cover
         const reader = new FileReader();
         reader.readAsDataURL(file);
         reader.onload = async () => {
@@ -127,8 +218,7 @@ export default function AIHealthAssistantPage() {
           setIsLoading(false);
         };
       } else {
-        // This case should ideally not be hit due to form validation, but as a fallback:
-        await fetchAIResponse(input);
+         await fetchAIResponse(input);
       }
     } else {
       await fetchAIResponse(input);
@@ -182,17 +272,39 @@ export default function AIHealthAssistantPage() {
                 name="question"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="flex items-center">
-                      <HelpCircle className="mr-2 h-4 w-4" />
-                      Ask a Health Question (Optional)
+                    <FormLabel className="flex items-center justify-between">
+                      <span className="flex items-center">
+                        <HelpCircle className="mr-2 h-4 w-4" />
+                        Ask a Health Question (Optional)
+                      </span>
+                      {speechApiSupported && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={toggleListening}
+                          className="ml-2"
+                          aria-label={isListening ? "Stop listening" : "Start voice input"}
+                          title={isListening ? "Stop listening" : "Start voice input"}
+                        >
+                          {isListening ? (
+                            <MicOff className="h-5 w-5 text-destructive animate-pulse" />
+                          ) : (
+                            <Mic className="h-5 w-5 text-primary" />
+                          )}
+                        </Button>
+                      )}
                     </FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="e.g., What are the common symptoms of flu? How does metformin work?"
+                        placeholder="e.g., What are the common symptoms of flu? Or click the mic to speak."
                         className="min-h-[100px]"
                         {...field}
                       />
                     </FormControl>
+                     {!speechApiSupported && (
+                        <p className="text-xs text-muted-foreground">Voice input not supported by your browser.</p>
+                     )}
                     <FormMessage />
                   </FormItem>
                 )}
@@ -200,7 +312,7 @@ export default function AIHealthAssistantPage() {
               <FormField
                 control={form.control}
                 name="drugImage"
-                render={({ field: { onChange, value, ...restField } }) => (
+                render={({ field: { onChange, value, ...restField } }) => ( // Destructure `value` out to avoid passing it to input[type=file]
                   <FormItem>
                     <FormLabel className="flex items-center">
                       <ImageUp className="mr-2 h-4 w-4" />
@@ -211,10 +323,10 @@ export default function AIHealthAssistantPage() {
                         type="file"
                         accept={ACCEPTED_IMAGE_TYPES.join(",")}
                         onChange={(e) => {
-                          onChange(e.target.files);
-                          handleImageChange(e);
+                          onChange(e.target.files); // RHF's onChange
+                          handleImageChange(e);     // Your custom handler
                         }}
-                        {...restField}
+                        {...restField} // Pass down other RHF props like name, ref, onBlur
                       />
                     </FormControl>
                     <FormMessage />
@@ -235,9 +347,9 @@ export default function AIHealthAssistantPage() {
                   />
                   <Button variant="outline" size="sm" onClick={() => {
                       setImagePreview(null);
-                      form.setValue("drugImage", undefined);
+                      form.setValue("drugImage", undefined); // Use undefined for FileList type
                       const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
-                      if (fileInput) fileInput.value = "";
+                      if (fileInput) fileInput.value = ""; // Reset native file input
                   }}>Remove Image</Button>
                 </div>
               )}
