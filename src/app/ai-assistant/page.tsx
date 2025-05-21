@@ -21,22 +21,27 @@ const MAX_FILE_SIZE_MB = 5;
 const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
 
-// Custom "ΔΣ" icon component
-const DeltaSigmaIcon = ({ className }: { className?: string }) => (
+// New "Medical Connection" icon component
+const MedicalConnectionIcon = ({ className }: { className?: string }) => (
   <svg
-    viewBox="0 0 40 24"
-    className={`delta-sigma-container ${className || ''}`}
+    viewBox="0 0 50 30" // Adjusted viewBox for a wider aspect ratio
+    className={className || ''}
+    fill="none" // Important for stroke animations to be visible
+    stroke="currentColor" // Default stroke color
   >
-    <text
-      x="50%"
-      y="50%"
-      dominantBaseline="middle"
-      textAnchor="middle"
-      fontSize="22" 
-      className="delta-sigma-text-animated"
-    >
-      ΔΣ
-    </text>
+    {/* Node 1 */}
+    <circle cx="10" cy="15" r="5" fill="currentColor" />
+    {/* Node 2 */}
+    <circle cx="40" cy="15" r="5" fill="currentColor" />
+    {/* Connecting Line - Animated */}
+    <line
+      x1="10"
+      y1="15"
+      x2="40"
+      y2="15"
+      strokeWidth="2.5"
+      className="medical-connection-line-animated"
+    />
   </svg>
 );
 
@@ -101,7 +106,6 @@ export default function AIHealthAssistantPage() {
         const transcript = event.results[last][0].transcript;
         const currentQuestion = form.getValues("question") || "";
         form.setValue("question", (currentQuestion ? currentQuestion + " " : "") + transcript);
-        // Auto-focus on textarea might be good here, but can be tricky
       };
 
       recognitionInstance.onerror = (event: SpeechRecognitionErrorEvent) => {
@@ -122,7 +126,6 @@ export default function AIHealthAssistantPage() {
 
       recognitionInstance.onend = () => {
         setIsListening(false);
-        // Consider if a "Stopped listening" toast is needed or too noisy.
       };
       recognitionRef.current = recognitionInstance;
     } else {
@@ -156,7 +159,6 @@ export default function AIHealthAssistantPage() {
         recognitionRef.current.start();
       } catch (err) {
         console.error("Error starting speech recognition:", err);
-        // This handles cases where start() might be called invalidly (e.g., too soon after stop)
         if ((err as DOMException).name === 'InvalidStateError') {
              toast({ title: "Voice Input Error", description: "Could not start voice input yet. Please wait a moment and try again.", variant: "destructive" });
         } else {
@@ -205,7 +207,7 @@ export default function AIHealthAssistantPage() {
 
     if (data.drugImage && typeof data.drugImage.length === 'number' && data.drugImage.length > 0) {
       const file = data.drugImage[0];
-      if (file) { // Extra check, though form validation should cover
+      if (file) { 
         const reader = new FileReader();
         reader.readAsDataURL(file);
         reader.onload = async () => {
@@ -249,7 +251,7 @@ export default function AIHealthAssistantPage() {
     <div className="space-y-6 max-w-3xl mx-auto">
       <div className="text-center">
         <h1 className="text-3xl font-bold flex items-center justify-center">
-          <DeltaSigmaIcon className="mr-3 h-8 w-8" />
+          <MedicalConnectionIcon className="mr-3 h-8 w-8 text-primary" />
           KlinRex AI
         </h1>
         <p className="text-muted-foreground mt-2">
@@ -312,7 +314,7 @@ export default function AIHealthAssistantPage() {
               <FormField
                 control={form.control}
                 name="drugImage"
-                render={({ field: { onChange, value, ...restField } }) => ( // Destructure `value` out to avoid passing it to input[type=file]
+                render={({ field: { onChange, value, ...restField } }) => (
                   <FormItem>
                     <FormLabel className="flex items-center">
                       <ImageUp className="mr-2 h-4 w-4" />
@@ -323,10 +325,10 @@ export default function AIHealthAssistantPage() {
                         type="file"
                         accept={ACCEPTED_IMAGE_TYPES.join(",")}
                         onChange={(e) => {
-                          onChange(e.target.files); // RHF's onChange
-                          handleImageChange(e);     // Your custom handler
+                          onChange(e.target.files); 
+                          handleImageChange(e);     
                         }}
-                        {...restField} // Pass down other RHF props like name, ref, onBlur
+                        {...restField} 
                       />
                     </FormControl>
                     <FormMessage />
@@ -347,9 +349,9 @@ export default function AIHealthAssistantPage() {
                   />
                   <Button variant="outline" size="sm" onClick={() => {
                       setImagePreview(null);
-                      form.setValue("drugImage", undefined); // Use undefined for FileList type
+                      form.setValue("drugImage", undefined); 
                       const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
-                      if (fileInput) fileInput.value = ""; // Reset native file input
+                      if (fileInput) fileInput.value = ""; 
                   }}>Remove Image</Button>
                 </div>
               )}
@@ -383,7 +385,7 @@ export default function AIHealthAssistantPage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
-              <DeltaSigmaIcon className="mr-2 h-5 w-5" />
+              <MedicalConnectionIcon className="mr-2 h-5 w-5 text-primary" />
               KlinRex AI Response
             </CardTitle>
           </CardHeader>
@@ -435,3 +437,4 @@ export default function AIHealthAssistantPage() {
     </div>
   );
 }
+

@@ -198,15 +198,6 @@ body {
   to { opacity: 0; }
 }
 
-.delta-sigma-text-animated {
-  font-family: 'Times New Roman', Times, serif; 
-  font-weight: bold;
-  fill: hsl(var(--foreground)); 
-}
-
-.dark .delta-sigma-text-animated {
-  fill: hsl(var(--foreground)); 
-}
 
 @keyframes animatedDarkGradient {
   0% { background-position: 0% 50%; }
@@ -259,4 +250,31 @@ body:not(.dark) {
   animation: rgb-dark-border-glow 8s linear infinite;
   border-width: 1px !important; /* Ensure border is present and animatable */
   border-style: solid !important; /* Ensure border style is solid */
+}
+
+/* Medical Connection Icon Animation */
+.medical-connection-line-animated {
+  stroke-dasharray: 30; /* Approximate length of the line segment */
+  stroke-dashoffset: 0;
+  animation: medicalConnectionDash 2s ease-in-out infinite;
+  stroke: currentColor; /* Ensure it uses theme color */
+}
+
+@keyframes medicalConnectionDash {
+  0% {
+    stroke-dashoffset: 30;
+    opacity: 0.3;
+  }
+  40% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  80% {
+    stroke-dashoffset: -30;
+    opacity: 0.3;
+  }
+  100% {
+    stroke-dashoffset: -30; /* Hold at end */
+    opacity: 0.3;
+  }
 }
