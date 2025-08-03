@@ -49,7 +49,7 @@ export default function LandingPage() {
         <div className="relative flex items-center justify-center">
             <div className="absolute inset-0 bg-primary/10 rounded-full blur-3xl -z-10"></div>
             <Image
-                src="https://placehold.co/800x600.png"
+                src="https://images.unsplash.com/photo-1526256262350-7da7584cf5eb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxtZWRpY2Fsc3xlbnwwfHx8fDE3NTQyMTEzMjN8MA&ixlib=rb-4.1.0&q=80&w=1080"
                 alt="A person using the KlinRex app on their phone"
                 width={800}
                 height={600}
