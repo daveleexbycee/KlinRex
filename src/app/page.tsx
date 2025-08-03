@@ -20,12 +20,18 @@ export default function LandingPage() {
   };
   
   useEffect(() => {
-    try {
-      ((window as any).adsbygoogle = (window as any).adsbygoogle || []).push({});
-    } catch (err) {
-      console.error(err);
+    const adSlot = document.querySelector('.adsbygoogle');
+    // Check if the ad slot has already been filled.
+    // AdSense adds a 'data-ad-status="filled"' attribute.
+    if (adSlot && !adSlot.hasAttribute('data-ad-status')) {
+        try {
+            ((window as any).adsbygoogle = (window as any).adsbygoogle || []).push({});
+        } catch (err) {
+            console.error("AdSense error:", err);
+        }
     }
   }, []);
+
 
   return (
     <div className="flex-1 w-full">
