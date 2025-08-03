@@ -2,8 +2,8 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Button } from "@/components/ui/button";
-import { Sun, Moon, Monitor } from "lucide-react";
+import { Switch } from "@/components/ui/switch"
+import { Sun, Moon } from "lucide-react"
 
 export function ThemeToggleButton() {
   const [effectiveTheme, setEffectiveTheme] = useState<'light' | 'dark'>('light');
@@ -37,18 +37,19 @@ export function ThemeToggleButton() {
   };
 
   if (!mounted) {
-    // Render a placeholder to avoid hydration mismatch during initial server render vs client render
-    // before useEffect runs.
-    return (
-      <Button variant="ghost" size="icon" aria-label="Toggle theme" disabled>
-        <Monitor className="h-5 w-5" />
-      </Button>
-    );
+    // Render a placeholder to avoid hydration mismatch
+    return <div className="h-6 w-11 rounded-full bg-muted animate-pulse" />;
   }
-
+  
   return (
-    <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label="Toggle theme">
-      {effectiveTheme === 'light' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
-    </Button>
+    <div className="flex items-center space-x-2">
+      <Sun className="h-5 w-5" />
+      <Switch
+        checked={effectiveTheme === 'dark'}
+        onCheckedChange={toggleTheme}
+        aria-label="Toggle theme"
+      />
+      <Moon className="h-5 w-5" />
+    </div>
   );
 }
