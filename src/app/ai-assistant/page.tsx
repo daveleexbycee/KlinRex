@@ -403,7 +403,7 @@ export default function AIHealthAssistantPage() {
                       <p><strong>Name:</strong> {aiResponse.drugIdentification.name || "N/A"}</p>
                       <p><strong>Dosage:</strong> {aiResponse.drugIdentification.dosage || "N/A"}</p>
                       <p><strong>Purpose/Advice:</strong></p>
-                      <div dangerouslySetInnerHTML={{ __html: aiResponse.drugIdentification.purpose?.replace(/\n/g, '<br />') || "N/A" }} />
+                      <div dangerouslySetInnerHTML={{ __html: aiResponse.drugIdentification.purpose?.replace(/\\n/g, '<br />') || "N/A" }} />
                       <p><strong>Confidence:</strong> {aiResponse.drugIdentification.confidence || "N/A"}</p>
                     </>
                   )}
@@ -417,7 +417,7 @@ export default function AIHealthAssistantPage() {
                   <CardTitle className="text-lg">Health Question Answer</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="prose prose-sm max-w-none dark:prose-invert" dangerouslySetInnerHTML={{ __html: aiResponse.healthAnswer.replace(/\n/g, '<br />') }} />
+                  <div className="prose prose-sm max-w-none dark:prose-invert" dangerouslySetInnerHTML={{ __html: aiResponse.healthAnswer.replace(/\\n/g, '<br />') }} />
                 </CardContent>
               </Card>
             )}

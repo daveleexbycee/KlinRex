@@ -8,16 +8,16 @@ body {
 
 @layer base {
   :root {
-    --background: 210 20% 98%;
+    --background: 210 100% 97%; /* #EBF4FF */
     --foreground: 222.2 84% 4.9%;
 
-    --card: 210 20% 98%;
+    --card: 210 100% 100%; /* White cards on light bg */
     --card-foreground: 222.2 84% 4.9%;
 
-    --popover: 210 20% 98%;
+    --popover: 210 100% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 173 80% 30%; /* Dark Teal */
+    --primary: 217 89% 61%; /* #4A8FE7 */
     --primary-foreground: 210 40% 98%;
 
     --secondary: 210 40% 96.1%;
@@ -26,7 +26,7 @@ body {
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
 
-    --accent: 210 40% 96.1%;
+    --accent: 168 47% 62%; /* #73C6B6 */
     --accent-foreground: 222.2 47.4% 11.2%;
     
     --destructive: 0 84.2% 60.2%;
@@ -34,7 +34,7 @@ body {
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 173 80% 30%;
+    --ring: 217 89% 61%; /* Primary blue */
 
     --radius: 0.5rem;
     
@@ -55,8 +55,8 @@ body {
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 173 70% 60%; /* Lighter Teal for Dark Mode */
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 217 89% 61%; /* #4A8FE7 */
+    --primary-foreground: 210 40% 98%;
 
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
@@ -64,7 +64,7 @@ body {
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
 
-    --accent: 217.2 32.6% 17.5%;
+    --accent: 168 47% 62%; /* #73C6B6 */
     --accent-foreground: 210 40% 98%;
 
     --destructive: 0 62.8% 30.6%;
@@ -72,7 +72,7 @@ body {
 
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 173 70% 60%;
+    --ring: 217 89% 61%; /* Primary blue */
 
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
@@ -100,13 +100,13 @@ body {
     height: 12px;
   }
   ::-webkit-scrollbar-track {
-    background: hsl(var(--secondary));
+    background: hsl(var(--background));
     border-radius: 10px;
   }
   ::-webkit-scrollbar-thumb {
-    background: hsl(var(--primary) / 0.8);
+    background: hsl(var(--primary) / 0.6);
     border-radius: 10px;
-    border: 3px solid hsl(var(--secondary));
+    border: 3px solid hsl(var(--background));
   }
   ::-webkit-scrollbar-thumb:hover {
     background: hsl(var(--primary));
