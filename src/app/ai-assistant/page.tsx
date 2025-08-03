@@ -249,12 +249,12 @@ export default function AIHealthAssistantPage() {
 
   return (
     <div className="space-y-6 max-w-3xl mx-auto">
-      <div className="text-center">
-        <h1 className="text-3xl font-bold flex items-center justify-center">
-          <MedicalConnectionIcon className="mr-3 h-8 w-8 text-primary" />
+      <div className="text-center space-y-2">
+         <MedicalConnectionIcon className="mx-auto h-12 w-12 text-primary" />
+        <h1 className="text-3xl font-bold">
           KlinRex AI
         </h1>
-        <p className="text-muted-foreground mt-2">
+        <p className="text-muted-foreground">
           Your AI-powered health assistant. Ask questions or identify drugs from images.
         </p>
       </div>
@@ -437,4 +437,3 @@ export default function AIHealthAssistantPage() {
     </div>
   );
 }
-

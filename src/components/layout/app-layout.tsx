@@ -1,4 +1,3 @@
-
 // src/components/layout/app-layout.tsx
 "use client";
 
@@ -17,7 +16,7 @@ import {
   SidebarFooter,
   useSidebar,
 } from '@/components/ui/sidebar';
-import { ShieldCheck, LayoutDashboard, HeartPulse, Hospital, Pill, FileText, Settings, LogOut, LogIn, UserCircle2, Loader2, Mail, KeyRound, Menu, Sun, Moon } from 'lucide-react';
+import { ShieldCheck, LayoutDashboard, HeartPulse, Hospital, Pill, FileText, Settings, LogOut, LogIn, UserCircle2, Loader2, Mail, KeyRound, Menu } from 'lucide-react';
 import { SheetTitle } from '@/components/ui/sheet';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -47,7 +46,7 @@ const navItems = [
 
 const AppBrand = () => {
   const { isMobile } = useSidebar();
-  const brandClasses = "p-0 m-0 text-lg font-semibold text-sidebar-primary group-data-[collapsible=icon]:hidden";
+  const brandClasses = "text-lg font-semibold text-sidebar-primary group-data-[collapsible=icon]:hidden";
 
   if (isMobile) {
     return <SheetTitle className={brandClasses}>KlinRex</SheetTitle>;
@@ -100,8 +99,6 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             </DropdownMenuItem>
             <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="flex justify-between items-center">
               <div className="flex items-center">
-                {/* We need to get current theme to show correct icon here, or let ThemeToggleButton handle icon */}
-                {/* For simplicity, ThemeToggleButton will show its own icon */}
                 <span className="mr-2">Theme</span>
               </div>
               <ThemeToggleButton />
@@ -159,11 +156,12 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     <SidebarProvider defaultOpen>
       <Sidebar>
         <SidebarHeader className="p-4 border-b border-sidebar-border">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center justify-between group-data-[collapsible=icon]:justify-center">
             <Link href="/" className="flex items-center gap-2 text-lg font-semibold text-sidebar-primary">
               <ShieldCheck className="h-7 w-7" />
               <AppBrand />
             </Link>
+            <SidebarTrigger className="group-data-[collapsible=icon]:hidden"/>
           </div>
         </SidebarHeader>
         <SidebarContent className="flex-1 p-4">
@@ -189,19 +187,16 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         </SidebarFooter>
       </Sidebar>
       <SidebarInset className="flex flex-col">
-        <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b bg-background/80 backdrop-blur-sm px-4">
-          <div className="flex items-center gap-3">
-            <SidebarTrigger>
-              <Menu className="h-6 w-6" />
-            </SidebarTrigger>
-            <Link href="/" className="flex items-center gap-2 text-lg font-semibold text-primary">
-              <ShieldCheck className="h-7 w-7" />
-              <span className="hidden sm:inline">KlinRex</span> 
-            </Link>
-          </div>
-          {/* ThemeToggleButton removed from here */}
+        <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b bg-background/80 backdrop-blur-sm px-4 md:hidden">
+          <Link href="/" className="flex items-center gap-2 text-lg font-semibold text-primary">
+            <ShieldCheck className="h-7 w-7" />
+            <span className="font-bold">KlinRex</span> 
+          </Link>
+          <SidebarTrigger>
+            <Menu className="h-6 w-6" />
+          </SidebarTrigger>
         </header>
-        <main className="flex-1 overflow-y-auto p-6 relative">
+        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 relative">
           {children}
           <FloatingAIButton />
         </main>

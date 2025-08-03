@@ -4,7 +4,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { Activity, ArrowRight, FileText, HeartPulse, Hospital, Pill, BriefcaseMedical, Stethoscope, FlaskConical, Download } from "lucide-react"; // Added Download icon
+import { Activity, ArrowRight, FileText, HeartPulse, Hospital, Pill, BriefcaseMedical, Stethoscope, FlaskConical, Download, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -138,53 +138,43 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8">
-      <Card className="shadow-lg">
-        <CardHeader className="pb-4">
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-            <div>
-              <CardTitle className="text-3xl font-bold text-primary">Welcome to KlinRex!</CardTitle>
-              <CardDescription className="text-lg text-muted-foreground mt-1">
-                Your personal health organizer. Manage your medical journey with ease.
+      <Card className="shadow-lg overflow-hidden">
+        <div className="grid md:grid-cols-2">
+            <div className="p-8 flex flex-col justify-center">
+              <CardTitle className="text-3xl font-bold">Welcome to KlinRex</CardTitle>
+              <CardDescription className="text-lg text-muted-foreground mt-2">
+                Your personal, secure health organizer.
               </CardDescription>
+              <p className="text-foreground mt-4">
+                KlinRex helps you keep a comprehensive record of your health. Use our AI to get insights, and easily export your data when needed.
+              </p>
+              <div className="flex flex-wrap items-center gap-4 mt-6">
+                <Button asChild size="lg">
+                  <Link href="/medical-history">
+                    Get Started <ArrowRight className="ml-2 h-5 w-5" />
+                  </Link>
+                </Button>
+                {installPrompt && (
+                  <Button onClick={handleInstallClick} size="lg" variant="outline">
+                    <Download className="mr-2 h-5 w-5" />
+                    Install App
+                  </Button>
+                )}
+              </div>
             </div>
-            <Image 
-              src="https://placehold.co/600x400.png" 
-              alt="Healthcare illustration" 
-              width={200} 
-              height={133} 
-              className="rounded-lg object-cover"
-              data-ai-hint="healthcare illustration"
-            />
-          </div>
-        </CardHeader>
-        <CardContent>
-          <p className="text-foreground">
-            KlinRex helps you keep a comprehensive record of your health, from medical history and hospital visits to medications. 
-            Use our KlinRex AI (via the floating button) to get health insights and easily export your data when needed.
-          </p>
-          <div className="flex flex-wrap items-center gap-4 mt-6">
-            <Button asChild size="lg">
-              <Link href="/medical-history">
-                Get Started <ArrowRight className="ml-2 h-5 w-5" />
-              </Link>
-            </Button>
-            {installPrompt && (
-              <Button onClick={handleInstallClick} size="lg" variant="outline">
-                <Download className="mr-2 h-5 w-5" />
-                Install App
-              </Button>
-            )}
-          </div>
-        </CardContent>
+            <div className="hidden md:flex items-center justify-center bg-primary/5 p-8">
+                <ShieldCheck className="w-32 h-32 text-primary/80" strokeWidth={1}/>
+            </div>
+        </div>
       </Card>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4">
         {features.map((feature) => (
           <Card key={feature.title} className="hover:shadow-xl transition-shadow duration-300 flex flex-col">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-xl font-semibold">{feature.title}</CardTitle>
-              <div className={`p-2 rounded-full ${feature.bgColor}`}>
-                <feature.icon className={`h-6 w-6 ${feature.color}`} />
+               <div className={`p-2 rounded-full bg-secondary`}>
+                <feature.icon className={`h-6 w-6 text-secondary-foreground`} />
               </div>
             </CardHeader>
             <CardContent className="flex-grow">
