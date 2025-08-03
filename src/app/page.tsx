@@ -1,13 +1,15 @@
 // src/app/page.tsx
 "use client";
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Download, HeartPulse } from "lucide-react";
+import { ArrowRight, Download } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePWAInstall } from '@/contexts/pwa-install-context';
 import { useAuth } from '@/contexts/auth-context';
+import Script from 'next/script';
+import { Card, CardContent } from '@/components/ui/card';
 
 export default function LandingPage() {
   const { installPrompt, triggerInstall } = usePWAInstall();
@@ -16,9 +18,23 @@ export default function LandingPage() {
   const handleInstallClick = () => {
     triggerInstall();
   };
+  
+  useEffect(() => {
+    try {
+      ((window as any).adsbygoogle = (window as any).adsbygoogle || []).push({});
+    } catch (err) {
+      console.error(err);
+    }
+  }, []);
 
   return (
     <div className="flex-1 w-full">
+       <Script
+        async
+        src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3338207509752884"
+        crossOrigin="anonymous"
+        strategy="afterInteractive"
+      />
       <section className="container grid lg:grid-cols-2 gap-12 items-center py-12 md:py-24">
         <div className="flex flex-col items-start space-y-6">
           <span className="text-primary font-semibold tracking-wider uppercase text-sm">
@@ -58,6 +74,19 @@ export default function LandingPage() {
                 priority
             />
         </div>
+      </section>
+
+      <section className="container py-12">
+          <Card>
+              <CardContent className="p-4 md:p-6">
+                  <ins className="adsbygoogle"
+                      style={{ display: 'block' }}
+                      data-ad-client="ca-pub-3338207509752884"
+                      data-ad-slot="3496010343"
+                      data-ad-format="auto"
+                      data-full-width-responsive="true"></ins>
+              </CardContent>
+          </Card>
       </section>
     </div>
   );
