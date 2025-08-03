@@ -22,14 +22,14 @@ export default function LandingPage() {
       <section className="container grid lg:grid-cols-2 gap-12 items-center py-12 md:py-24">
         <div className="flex flex-col items-start space-y-6">
           <span className="text-primary font-semibold tracking-wider uppercase text-sm">
-            PERSONAL HEALTH APP
+            PERSONAL HEALTH SITE
           </span>
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold !leading-tight text-foreground">
             A modern way <br />
             to track your health
           </h1>
           <p className="text-muted-foreground text-lg max-w-prose">
-            KlinRex is a free mobile-friendly app to manage medication plans, log health data, track symptoms, and share information with doctors for remote consultations.
+            KlinRex is a free mobile-friendly app to manage medication plans, log health data, track symptoms, and export(pdf) your info to doctors.
           </p>
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
             <Button size="lg" asChild>
