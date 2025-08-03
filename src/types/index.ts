@@ -25,4 +25,5 @@ export interface MedicationItem {
   reason?: string;
   startDate?: string; // Optional: YYYY-MM-DD
   endDate?: string; // Optional: YYYY-MM-DD
+  reminders?: boolean;
 }

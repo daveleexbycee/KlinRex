@@ -7,12 +7,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from '@/components/ui/textarea'; // Though not used in current form, keep for consistency or future use
+import { Switch } from "@/components/ui/switch";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import type { MedicationItem } from "@/types";
-import { PlusCircle, Edit3, Trash2, CalendarIcon, Pill as PillIcon, Loader2, AlertTriangle } from "lucide-react";
+import { PlusCircle, Edit3, Trash2, CalendarIcon, Pill as PillIcon, Loader2, AlertTriangle, BellRing } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
@@ -30,6 +30,7 @@ const medicationSchema = z.object({
   reason: z.string().optional(),
   startDate: z.date().optional(),
   endDate: z.date().optional(),
+  reminders: z.boolean().default(false),
 }).refine(data => {
   if (data.startDate && data.endDate) {
     return data.endDate >= data.startDate;
@@ -68,6 +69,7 @@ export default function MedicationsPage() {
       reason: "",
       startDate: undefined,
       endDate: undefined,
+      reminders: false,
     },
   });
 
@@ -111,6 +113,7 @@ export default function MedicationsPage() {
           reason: editingItem.reason || "",
           startDate: editingItem.startDate ? new Date(editingItem.startDate) : undefined,
           endDate: editingItem.endDate ? new Date(editingItem.endDate) : undefined,
+          reminders: editingItem.reminders || false,
         });
       } else {
         form.reset({
@@ -120,6 +123,7 @@ export default function MedicationsPage() {
           reason: "",
           startDate: undefined,
           endDate: undefined,
+          reminders: false,
         });
       }
     }
@@ -333,6 +337,29 @@ export default function MedicationsPage() {
                 <DateField name="startDate" label="Start Date (Optional)" />
                 <DateField name="endDate" label="End Date (Optional)" />
               </div>
+               <FormField
+                control={form.control}
+                name="reminders"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm mt-4">
+                    <div className="space-y-0.5">
+                        <FormLabel className="flex items-center">
+                            <BellRing className="mr-2 h-4 w-4" />
+                            Enable Reminders
+                        </FormLabel>
+                        <p className="text-xs text-muted-foreground">
+                            Show this medication on your dashboard when active.
+                        </p>
+                    </div>
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
               <DialogFooter>
                 <DialogClose asChild>
                   <Button type="button" variant="outline" onClick={() => setIsFormOpen(false)}>Cancel</Button>
@@ -384,7 +411,10 @@ export default function MedicationsPage() {
           {medicationItems.map((item) => (
             <Card key={item.id} className="flex flex-col">
               <CardHeader>
-                <CardTitle className="text-lg">{item.name}</CardTitle>
+                <div className="flex justify-between items-start">
+                    <CardTitle className="text-lg">{item.name}</CardTitle>
+                    {item.reminders && <BellRing className="h-5 w-5 text-primary" title="Reminders Enabled"/>}
+                </div>
                 <CardDescription>{item.dosage} - {item.frequency}</CardDescription>
               </CardHeader>
               <CardContent className="flex-grow space-y-1">
@@ -417,5 +447,3 @@ export default function MedicationsPage() {
     </div>
   );
 }
-
-      

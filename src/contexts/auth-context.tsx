@@ -18,6 +18,7 @@ import { auth, storage, db } from '@/lib/firebase/config';
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { useToast } from '@/hooks/use-toast';
+import { useRouter } from 'next/navigation';
 
 // Extended User type
 export interface KlinRexUser extends FirebaseUser {
@@ -57,6 +58,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<KlinRexUser | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const router = useRouter();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -76,6 +78,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
     return () => unsubscribe();
   }, []);
+
+  const handleAuthSuccess = () => {
+    toast({ title: "Success", description: "Logged in successfully!" });
+    router.push('/dashboard');
+  };
 
   const handleAuthError = (error: AuthError, defaultMessage: string) => {
     console.error("Authentication error:", error.code, error.message);
@@ -131,8 +138,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
-      // onAuthStateChanged will handle fetching custom data and setting user
-      toast({ title: "Success", description: "Logged in successfully with Google!" });
+      // onAuthStateChanged will handle the rest, but we can redirect here
+      handleAuthSuccess();
     } catch (error) {
       handleAuthError(error as AuthError, "Could not sign in with Google. Please try again.");
     } finally {
@@ -144,8 +151,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setLoading(true);
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      // onAuthStateChanged will handle fetching custom data and setting user
-      toast({ title: "Success", description: "Logged in successfully!" });
+      handleAuthSuccess();
       return true;
     } catch (error) {
       handleAuthError(error as AuthError, "Could not sign in with email/password. Please try again.");
@@ -160,9 +166,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       // Create an empty profile in Firestore for the new user
       const userProfileRef = doc(db, "userProfiles", userCredential.user.uid);
-      await setDoc(userProfileRef, { email: userCredential.user.email }); // Store email or other initial data
-      // onAuthStateChanged will handle setting user
-      toast({ title: "Success", description: "Account created and logged in successfully!" });
+      await setDoc(userProfileRef, { email: userCredential.user.email });
+      handleAuthSuccess();
       return true;
     } catch (error) {
       handleAuthError(error as AuthError, "Could not create account. Please try again.");
@@ -181,7 +186,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       const { displayName, photoFile, bloodGroup, bloodType, emergencyContact, address } = data;
       
-      // Update Firebase Auth profile (displayName, photoURL)
       const authProfileUpdates: { displayName?: string; photoURL?: string | null } = {};
       if (displayName !== undefined) {
         authProfileUpdates.displayName = displayName;
@@ -199,7 +203,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         await updateFirebaseAuthProfile(currentFirebaseUser, authProfileUpdates);
       }
 
-      // Update custom data in Firestore
       const userProfileRef = doc(db, "userProfiles", currentFirebaseUser.uid);
       const customProfileDataToUpdate: Record<string, any> = {};
       if (bloodGroup !== undefined) customProfileDataToUpdate.bloodGroup = bloodGroup;
@@ -211,15 +214,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         await setDoc(userProfileRef, customProfileDataToUpdate, { merge: true });
       }
       
-      // Manually update the local user state to reflect changes immediately
       setUser(prevUser => {
         if (!prevUser) return null;
         return {
           ...prevUser,
-          // Update Firebase Auth controlled fields
           displayName: displayName !== undefined ? displayName : prevUser.displayName,
           photoURL: newPhotoURL !== undefined ? newPhotoURL : prevUser.photoURL,
-          // Update custom fields
           bloodGroup: bloodGroup !== undefined ? bloodGroup : prevUser.bloodGroup,
           bloodType: bloodType !== undefined ? bloodType : prevUser.bloodType,
           emergencyContact: emergencyContact !== undefined ? emergencyContact : prevUser.emergencyContact,
@@ -242,12 +242,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setLoading(true);
     try {
       await signOut(auth);
-      // onAuthStateChanged will set user to null
       toast({ title: "Success", description: "Logged out successfully." });
+      router.push('/');
     } catch (error) {
        handleAuthError(error as AuthError, "Could not sign out. Please try again.");
     } finally {
-      // setLoading(false); // onAuthStateChanged will set loading to false
+      setLoading(false);
     }
   };
 

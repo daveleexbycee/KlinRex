@@ -24,6 +24,7 @@ import { ProfileEditDialog } from '@/components/auth/ProfileEditDialog';
 import { ThemeToggleButton } from '@/components/theme-toggle-button';
 
 const navItems = [
+  { href: '/dashboard', label: 'Dashboard' },
   { href: '/medical-history', label: 'Medicals' },
   { href: '/visits', label: 'Visits' },
   { href: '/medications', label: 'Meds' },
@@ -67,7 +68,7 @@ export function DesktopHeader() {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-             <DropdownMenuItem onSelect={() => router.push('/')}>
+             <DropdownMenuItem onSelect={() => router.push('/dashboard')}>
               <LayoutDashboard className="mr-2 h-4 w-4" />
               Dashboard
             </DropdownMenuItem>
