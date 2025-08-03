@@ -19,11 +19,10 @@ const roboto_mono = Roboto_Mono({
 export const metadata: Metadata = {
   title: 'KlinRex',
   description: 'KlinRex: Your personal health organizer.',
+  manifest: '/manifest.json',
   icons: {
     icon: '/favicon.ico', // Points to public/favicon.ico
-    // You can also add other icon types here if needed:
-    // apple: '/apple-icon.png',
-    // shortcut: '/shortcut-icon.png',
+    apple: '/icons/icon-192x192.svg',
   },
 };
 
