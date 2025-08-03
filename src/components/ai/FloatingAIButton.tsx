@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 // New "Medical Connection" icon component
-const MedicalConnectionIcon = ({ className }: { className?: string }) => (
+export const MedicalConnectionIcon = ({ className }: { className?: string }) => (
   <svg
     viewBox="0 0 50 30" // Adjusted viewBox
     className={className || ''}

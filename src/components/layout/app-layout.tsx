@@ -1,7 +1,7 @@
 // src/components/layout/app-layout.tsx
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
   SidebarProvider,
@@ -34,14 +34,16 @@ import { useAuth } from '@/contexts/auth-context';
 import { EmailPasswordLoginDialog } from '@/components/auth/EmailPasswordLoginDialog';
 import { EmailPasswordSignupDialog } from '@/components/auth/EmailPasswordSignupDialog';
 import { ProfileEditDialog } from '@/components/auth/ProfileEditDialog';
-import { FloatingAIButton } from '@/components/ai/FloatingAIButton';
+import { MedicalConnectionIcon } from '@/components/ai/FloatingAIButton';
+import { usePwa } from '@/hooks/use-pwa';
+import { BottomNavBar } from './bottom-nav-bar';
 
 const navItems = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/medical-history', label: 'Medical History', icon: HeartPulse },
   { href: '/visits', label: 'Visits', icon: Hospital },
   { href: '/medications', label: 'Medications', icon: Pill },
-  { href: '/export', label: 'Export PDF', icon: FileText },
+  { href: '/ai-assistant', label: 'AI Assistant', icon: MedicalConnectionIcon },
 ];
 
 const AppBrand = () => {
@@ -54,14 +56,14 @@ const AppBrand = () => {
   return <span className={brandClasses}>KlinRex</span>;
 };
 
-export function AppLayout({ children }: { children: React.ReactNode }) {
+const DesktopSidebar = () => {
   const pathname = usePathname();
   const { user, loading, loginWithGoogle, logout } = useAuth();
   const [isLoginDialogOpen, setIsLoginDialogOpen] = useState(false);
   const [isSignupDialogOpen, setIsSignupDialogOpen] = useState(false);
-  const [isProfileEditDialogOpen, setIsProfileEditDialogOpen] = useState(false); 
+  const [isProfileEditDialogOpen, setIsProfileEditDialogOpen] = useState(false);
 
-  const UserProfileSection = () => {
+    const UserProfileSection = () => {
     if (loading) {
       return (
         <Button variant="ghost" className="flex items-center gap-3 w-full justify-start p-2 group-data-[collapsible=icon]:justify-center" disabled>
@@ -97,7 +99,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               <Settings className="mr-2 h-4 w-4" />
               <span>Settings</span>
             </DropdownMenuItem>
-            <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="flex justify-between items-center">
+             <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="flex justify-between items-center">
               <div className="flex items-center">
                 <span className="mr-2">Theme</span>
               </div>
@@ -152,58 +154,98 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     );
   };
 
+  const desktopNavItems = [
+      ...navItems,
+      { href: '/export', label: 'Export PDF', icon: FileText },
+  ]
+
   return (
     <SidebarProvider defaultOpen>
-      <Sidebar>
-        <SidebarHeader className="p-4 border-b border-sidebar-border">
-          <div className="flex items-center justify-between group-data-[collapsible=icon]:justify-center">
-            <Link href="/" className="flex items-center gap-2 text-lg font-semibold text-sidebar-primary">
-              <HeartPulse className="h-7 w-7" />
-              <AppBrand />
-            </Link>
-            <SidebarTrigger className="group-data-[collapsible=icon]:hidden"/>
-          </div>
-        </SidebarHeader>
-        <SidebarContent className="flex-1 p-4">
-          <SidebarMenu>
-            {navItems.map((item) => (
-              <SidebarMenuItem key={item.href}>
-                <Link href={item.href} legacyBehavior passHref>
-                  <SidebarMenuButton
-                    isActive={pathname === item.href}
-                    tooltip={item.label}
-                    className="justify-start"
-                  >
-                    <item.icon className="h-5 w-5" />
-                    <span className="group-data-[collapsible=icon]:hidden">{item.label}</span>
-                  </SidebarMenuButton>
+        <Sidebar>
+            <SidebarHeader className="p-4 border-b border-sidebar-border">
+            <div className="flex items-center justify-between group-data-[collapsible=icon]:justify-center">
+                <Link href="/" className="flex items-center gap-2 text-lg font-semibold text-sidebar-primary">
+                <HeartPulse className="h-7 w-7" />
+                <AppBrand />
                 </Link>
-              </SidebarMenuItem>
-            ))}
-          </SidebarMenu>
-        </SidebarContent>
-        <SidebarFooter className="p-4 border-t border-sidebar-border flex-shrink-0">
-           <UserProfileSection />
-        </SidebarFooter>
-      </Sidebar>
-      <SidebarInset className="flex flex-col">
-        <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b bg-background/80 backdrop-blur-sm px-4 md:hidden">
-          <Link href="/" className="flex items-center gap-2 text-lg font-semibold text-primary">
-            <HeartPulse className="h-7 w-7" />
-            <span className="font-bold">KlinRex</span> 
-          </Link>
-          <SidebarTrigger>
-            <Menu className="h-6 w-6" />
-          </SidebarTrigger>
-        </header>
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 relative">
-          {children}
-          <FloatingAIButton />
-        </main>
-      </SidebarInset>
-      <EmailPasswordLoginDialog open={isLoginDialogOpen} onOpenChange={setIsLoginDialogOpen} />
-      <EmailPasswordSignupDialog open={isSignupDialogOpen} onOpenChange={setIsSignupDialogOpen} />
-      <ProfileEditDialog open={isProfileEditDialogOpen} onOpenChange={setIsProfileEditDialogOpen} />
+                <SidebarTrigger className="group-data-[collapsible=icon]:hidden"/>
+            </div>
+            </SidebarHeader>
+            <SidebarContent className="flex-1 p-4">
+            <SidebarMenu>
+                {desktopNavItems.map((item) => (
+                <SidebarMenuItem key={item.href}>
+                    <Link href={item.href} legacyBehavior passHref>
+                    <SidebarMenuButton
+                        isActive={pathname === item.href}
+                        tooltip={item.label}
+                        className="justify-start"
+                    >
+                        <item.icon className="h-5 w-5" />
+                        <span className="group-data-[collapsible=icon]:hidden">{item.label}</span>
+                    </SidebarMenuButton>
+                    </Link>
+                </SidebarMenuItem>
+                ))}
+            </SidebarMenu>
+            </SidebarContent>
+            <SidebarFooter className="p-4 border-t border-sidebar-border flex-shrink-0">
+            <UserProfileSection />
+            </SidebarFooter>
+        </Sidebar>
+        <SidebarInset className="flex flex-col">
+            <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b bg-background/80 backdrop-blur-sm px-4 md:hidden">
+            <Link href="/" className="flex items-center gap-2 text-lg font-semibold text-primary">
+                <HeartPulse className="h-7 w-7" />
+                <span className="font-bold">KlinRex</span> 
+            </Link>
+            <SidebarTrigger>
+                <Menu className="h-6 w-6" />
+            </SidebarTrigger>
+            </header>
+            <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 relative">
+                <EmailPasswordLoginDialog open={isLoginDialogOpen} onOpenChange={setIsLoginDialogOpen} />
+                <EmailPasswordSignupDialog open={isSignupDialogOpen} onOpenChange={setIsSignupDialogOpen} />
+                <ProfileEditDialog open={isProfileEditDialogOpen} onOpenChange={setIsProfileEditDialogOpen} />
+            </main>
+        </SidebarInset>
     </SidebarProvider>
+  )
+}
+
+
+export function AppLayout({ children }: { children: React.ReactNode }) {
+  const isPwa = usePwa();
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  useEffect(() => {
+    if (isPwa) {
+      document.body.classList.add('pwa-body-padding');
+    } else {
+      document.body.classList.remove('pwa-body-padding');
+    }
+  }, [isPwa]);
+
+  if (!isClient) {
+    return null; // Or a loading spinner
+  }
+
+  return (
+    <>
+      {isPwa ? (
+        <>
+            <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 relative">
+                {children}
+            </main>
+            <BottomNavBar navItems={navItems} />
+        </>
+      ) : (
+        <DesktopSidebar />
+      )}
+    </>
   );
 }

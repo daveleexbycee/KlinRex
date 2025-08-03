@@ -8,13 +8,13 @@ body {
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    --background: 220 20% 98%;
     --foreground: 222.2 84% 4.9%;
 
-    --card: 0 0% 100%;
+    --card: 220 20% 98%;
     --card-foreground: 222.2 84% 4.9%;
 
-    --popover: 0 0% 100%;
+    --popover: 220 20% 98%;
     --popover-foreground: 222.2 84% 4.9%;
 
     --primary: 217.2 91.2% 59.8%;
@@ -109,6 +109,10 @@ body {
   body {
     @apply bg-background text-foreground;
     transition: background-color 0.5s ease; /* Smooth transition for background changes */
+  }
+  
+  .pwa-body-padding {
+    padding-bottom: calc(60px + env(safe-area-inset-bottom));
   }
 }
 
@@ -211,60 +215,4 @@ body:not(.dark) {
 
 .dark body {
   background-color: hsl(var(--background));
-}
-
-/* RGB Border Glow Animation for Dark Mode */
-@keyframes rgb-dark-border-glow {
-  0%   { border-color: hsl(0, 100%, 75%); box-shadow: 0 0 4px 1px hsl(0, 100%, 75%); }
-  14%  { border-color: hsl(45, 100%, 70%); box-shadow: 0 0 4px 1px hsl(45, 100%, 70%); } /* Orange-Yellow */
-  28%  { border-color: hsl(90, 100%, 70%); box-shadow: 0 0 4px 1px hsl(90, 100%, 70%); } /* Lime Green */
-  42%  { border-color: hsl(135, 100%, 70%); box-shadow: 0 0 4px 1px hsl(135, 100%, 70%); } /* Spring Green */
-  57%  { border-color: hsl(180, 100%, 70%); box-shadow: 0 0 4px 1px hsl(180, 100%, 70%); } /* Cyan */
-  71%  { border-color: hsl(225, 100%, 75%); box-shadow: 0 0 4px 1px hsl(225, 100%, 75%); } /* Dodger Blue */
-  85%  { border-color: hsl(270, 100%, 75%); box-shadow: 0 0 4px 1px hsl(270, 100%, 75%); } /* Purple */
-  100% { border-color: hsl(0, 100%, 75%); box-shadow: 0 0 4px 1px hsl(0, 100%, 75%); }
-}
-
-.dark .card,
-.dark div[role="dialog"][class*="border"], /* More specific to DialogContent */
-.dark div[data-radix-popper-content-wrapper] > div[class*="border"], /* More specific to PopoverContent */
-.dark input[type="text"], 
-.dark input[type="email"], 
-.dark input[type="password"], 
-.dark input[type="file"], 
-.dark input[type="tel"],
-.dark textarea,
-.dark button[data-radix-select-trigger],
-.dark button[class*="border-input"]:not([data-radix-select-trigger]) /* Targets outline buttons */
-{
-  animation: rgb-dark-border-glow 8s linear infinite;
-  border-width: 1px !important; /* Ensure border is present and animatable */
-  border-style: solid !important; /* Ensure border style is solid */
-}
-
-/* Medical Connection Icon Animation */
-.medical-connection-line-animated {
-  stroke-dasharray: 30; /* Approximate length of the line segment */
-  stroke-dashoffset: 0;
-  animation: medicalConnectionDash 2s ease-in-out infinite;
-  stroke: currentColor; /* Ensure it uses theme color */
-}
-
-@keyframes medicalConnectionDash {
-  0% {
-    stroke-dashoffset: 30;
-    opacity: 0.3;
-  }
-  40% {
-    stroke-dashoffset: 0;
-    opacity: 1;
-  }
-  80% {
-    stroke-dashoffset: -30;
-    opacity: 0.3;
-  }
-  100% {
-    stroke-dashoffset: -30; /* Hold at end */
-    opacity: 0.3;
-  }
 }
