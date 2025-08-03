@@ -5,7 +5,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { HeartPulse, Settings, LogOut, UserCircle2, Loader2, Mail, KeyRound, FileText } from 'lucide-react';
+import { HeartPulse, Settings, LogOut, UserCircle2, Loader2, FileText } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
@@ -21,10 +21,8 @@ import { EmailPasswordLoginDialog } from '@/components/auth/EmailPasswordLoginDi
 import { EmailPasswordSignupDialog } from '@/components/auth/EmailPasswordSignupDialog';
 import { ProfileEditDialog } from '@/components/auth/ProfileEditDialog';
 import { ThemeToggleButton } from '@/components/theme-toggle-button';
-import { MedicalConnectionIcon } from '@/components/ai/FloatingAIButton';
 
 const navItems = [
-  { href: '/', label: 'Dashboard' },
   { href: '/medical-history', label: 'Medical History' },
   { href: '/visits', label: 'Visits' },
   { href: '/medications', label: 'Medications' },
@@ -34,7 +32,7 @@ const navItems = [
 
 export function DesktopHeader() {
   const pathname = usePathname();
-  const { user, loading, loginWithGoogle, logout } = useAuth();
+  const { user, loading, logout } = useAuth();
   const [isLoginDialogOpen, setIsLoginDialogOpen] = useState(false);
   const [isSignupDialogOpen, setIsSignupDialogOpen] = useState(false);
   const [isProfileEditDialogOpen, setIsProfileEditDialogOpen] = useState(false);
@@ -65,6 +63,9 @@ export function DesktopHeader() {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
+             <DropdownMenuItem onSelect={() => router.push('/')}>
+              Dashboard
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={() => setIsProfileEditDialogOpen(true)}>
               <Settings className="mr-2 h-4 w-4" />
               <span>Settings</span>
