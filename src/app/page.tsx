@@ -21,8 +21,8 @@ export default function LandingPage() {
   
   useEffect(() => {
     const adSlot = document.querySelector('.adsbygoogle');
-    // Check if the ad slot has already been filled.
-    // AdSense adds a 'data-ad-status="filled"' attribute.
+    // Check if the ad slot has already been filled by AdSense.
+    // AdSense adds a 'data-ad-status="filled"' attribute to the <ins> tag.
     if (adSlot && !adSlot.hasAttribute('data-ad-status')) {
         try {
             ((window as any).adsbygoogle = (window as any).adsbygoogle || []).push({});
