@@ -104,15 +104,15 @@ export function DesktopHeader() {
   return (
     <>
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur-sm">
-        <div className="container flex h-16 items-center">
-          <div className="mr-auto flex items-center">
-            <Link href="/" className="mr-6 flex items-center space-x-2">
+        <div className="container flex h-16 items-center px-4 md:px-8">
+          <div className="flex-1 flex justify-start">
+            <Link href="/" className="flex items-center space-x-2">
                 <HeartPulse className="h-7 w-7 text-primary" />
                 <span className="font-bold text-lg">KlinRex</span>
             </Link>
           </div>
           
-          <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
+          <nav className="hidden md:flex flex-1 justify-center items-center space-x-6 text-sm font-medium">
             {navItems.map((item) => (
               <Link
                 key={item.href}
@@ -127,7 +127,7 @@ export function DesktopHeader() {
             ))}
           </nav>
 
-          <div className="ml-auto flex items-center justify-end">
+          <div className="flex-1 flex items-center justify-end">
              <div className="hidden md:flex">
                 <UserProfileSection />
             </div>
