@@ -35,11 +35,14 @@ export default function DashboardPage() {
       
       const today = new Date();
       const activeReminders = allReminderMeds.filter(med => {
-        const startDate = med.startDate ? parseISO(med.startDate) : startOfDay(today);
+        // Ensure start and end dates exist before trying to parse them
+        if (!med.startDate) return false; // Or handle as needed if no start date means it's always active
+        
+        const startDate = parseISO(med.startDate);
+        // If there's an end date, use it; otherwise, use today to make the interval valid for checking.
         const endDate = med.endDate ? parseISO(med.endDate) : endOfDay(today);
-        // If no start date, it's active. If there's a start date, check if today is on or after it.
-        // If no end date, it's active. If there's an end date, check if today is on or before it.
-        return isWithinInterval(today, { start: startDate, end: endDate });
+        
+        return isWithinInterval(today, { start: startOfDay(startDate), end: endOfDay(endDate) });
       });
 
       setReminders(activeReminders);
