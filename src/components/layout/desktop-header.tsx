@@ -5,7 +5,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { HeartPulse, Settings, LogOut, UserCircle2, Loader2, FileText, LayoutDashboard } from 'lucide-react';
+import { HeartPulse, Settings, LogOut, UserCircle2, Loader2, FileText, LayoutDashboard, Menu } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
@@ -15,6 +15,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useAuth } from '@/contexts/auth-context';
 import { cn } from '@/lib/utils';
 import { EmailPasswordLoginDialog } from '@/components/auth/EmailPasswordLoginDialog';
@@ -25,7 +26,7 @@ import { ThemeToggleButton } from '@/components/theme-toggle-button';
 const navItems = [
   { href: '/medical-history', label: 'Medicals' },
   { href: '/visits', label: 'Visits' },
-  { href: '/medications', label: 'Medications' },
+  { href: '/medications', label: 'Meds' },
   { href: '/ai-assistant', label: 'AI' },
   { href: '/export', label: 'Export' },
 ];
@@ -37,6 +38,8 @@ export function DesktopHeader() {
   const [isLoginDialogOpen, setIsLoginDialogOpen] = useState(false);
   const [isSignupDialogOpen, setIsSignupDialogOpen] = useState(false);
   const [isProfileEditDialogOpen, setIsProfileEditDialogOpen] = useState(false);
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
+
 
   const UserProfileSection = () => {
     if (loading) {
@@ -72,7 +75,7 @@ export function DesktopHeader() {
               <Settings className="mr-2 h-4 w-4" />
               <span>Settings</span>
             </DropdownMenuItem>
-             <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="flex justify-between items-center">
+             <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="flex justify-between items-center md:hidden">
               <div className="flex items-center">
                 <Settings className="mr-2 h-4 w-4" />
                 <span>Theme</span>
@@ -105,8 +108,42 @@ export function DesktopHeader() {
     <>
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur-sm">
         <div className="container flex h-16 items-center px-4 md:px-8">
+          
+          <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+              <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon" className="md:hidden">
+                      <Menu className="h-6 w-6" />
+                      <span className="sr-only">Open Menu</span>
+                  </Button>
+              </SheetTrigger>
+              <SheetContent side="left">
+                  <nav className="grid gap-6 text-lg font-medium mt-8">
+                      <Link href="/" className="flex items-center gap-2 text-lg font-semibold" onClick={() => setIsSheetOpen(false)}>
+                          <HeartPulse className="h-7 w-7 text-primary" />
+                          <span className="font-bold text-lg">KlinRex</span>
+                      </Link>
+                      {navItems.map((item) => (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          onClick={() => setIsSheetOpen(false)}
+                          className={cn(
+                            "transition-colors hover:text-primary",
+                            pathname === item.href ? "text-primary" : "text-muted-foreground"
+                          )}
+                        >
+                          {item.label}
+                        </Link>
+                      ))}
+                      <div className="pt-4">
+                        <ThemeToggleButton />
+                      </div>
+                  </nav>
+              </SheetContent>
+          </Sheet>
+
           <div className="flex-1 flex justify-start pl-4 md:pl-0">
-            <Link href="/" className="flex items-center space-x-2">
+            <Link href="/" className="hidden md:flex items-center space-x-2">
                 <HeartPulse className="h-7 w-7 text-primary" />
                 <span className="font-bold text-lg">KlinRex</span>
             </Link>
@@ -127,10 +164,11 @@ export function DesktopHeader() {
             ))}
           </nav>
 
-          <div className="flex-1 flex items-center justify-end">
+          <div className="flex-1 flex items-center justify-end gap-2">
              <div className="hidden md:flex">
-                <UserProfileSection />
-            </div>
+                <ThemeToggleButton />
+             </div>
+             <UserProfileSection />
           </div>
         </div>
       </header>
