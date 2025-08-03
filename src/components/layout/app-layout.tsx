@@ -16,7 +16,7 @@ import {
   SidebarFooter,
   useSidebar,
 } from '@/components/ui/sidebar';
-import { ShieldCheck, LayoutDashboard, HeartPulse, Hospital, Pill, FileText, Settings, LogOut, LogIn, UserCircle2, Loader2, Mail, KeyRound, Menu } from 'lucide-react';
+import { HeartPulse, LayoutDashboard, Hospital, Pill, FileText, Settings, LogOut, LogIn, UserCircle2, Loader2, Mail, KeyRound, Menu } from 'lucide-react';
 import { SheetTitle } from '@/components/ui/sheet';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -158,7 +158,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         <SidebarHeader className="p-4 border-b border-sidebar-border">
           <div className="flex items-center justify-between group-data-[collapsible=icon]:justify-center">
             <Link href="/" className="flex items-center gap-2 text-lg font-semibold text-sidebar-primary">
-              <ShieldCheck className="h-7 w-7" />
+              <HeartPulse className="h-7 w-7" />
               <AppBrand />
             </Link>
             <SidebarTrigger className="group-data-[collapsible=icon]:hidden"/>
@@ -189,7 +189,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       <SidebarInset className="flex flex-col">
         <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b bg-background/80 backdrop-blur-sm px-4 md:hidden">
           <Link href="/" className="flex items-center gap-2 text-lg font-semibold text-primary">
-            <ShieldCheck className="h-7 w-7" />
+            <HeartPulse className="h-7 w-7" />
             <span className="font-bold">KlinRex</span> 
           </Link>
           <SidebarTrigger>

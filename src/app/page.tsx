@@ -4,7 +4,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { Activity, ArrowRight, FileText, HeartPulse, Hospital, Pill, BriefcaseMedical, Stethoscope, FlaskConical, Download, ShieldCheck } from "lucide-react";
+import { Activity, ArrowRight, FileText, HeartPulse, Hospital, Pill, BriefcaseMedical, Stethoscope, FlaskConical, Download } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -163,7 +163,7 @@ export default function DashboardPage() {
               </div>
             </div>
             <div className="hidden md:flex items-center justify-center bg-primary/5 p-8">
-                <ShieldCheck className="w-32 h-32 text-primary/80" strokeWidth={1}/>
+                <HeartPulse className="w-32 h-32 text-primary/80" strokeWidth={1}/>
             </div>
         </div>
       </Card>
