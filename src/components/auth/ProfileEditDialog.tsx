@@ -1,4 +1,3 @@
-
 // src/components/auth/ProfileEditDialog.tsx
 "use client";
 
@@ -22,8 +21,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth, type UserProfileUpdateData, type KlinRexUser } from '@/contexts/auth-context';
-import { Loader2, UserCircle2, Edit3, UploadCloud } from 'lucide-react';
+import { Loader2, UserCircle2, Edit3, UploadCloud, Download } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { usePWAInstall } from '@/contexts/pwa-install-context';
+import { Separator } from '@/components/ui/separator';
 
 
 const profileEditSchema = z.object({
@@ -48,6 +49,7 @@ const BLOOD_TYPES = ["Positive", "Negative", "Unknown"]; // Will map to Rh+ / Rh
 
 export function ProfileEditDialog({ open, onOpenChange }: ProfileEditDialogProps) {
   const { user, updateUserProfile, loading: authLoading } = useAuth();
+  const { installPrompt, triggerInstall } = usePWAInstall();
   const [isLoading, setIsLoading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -132,7 +134,7 @@ export function ProfileEditDialog({ open, onOpenChange }: ProfileEditDialogProps
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <ScrollArea className="max-h-[calc(100vh-200px)] p-1 pr-6"> {/* Added ScrollArea */}
+            <ScrollArea className="max-h-[calc(100vh-280px)] p-1 pr-6"> {/* Adjusted height */}
               <div className="space-y-4">
                 <div className="flex flex-col items-center space-y-3">
                   <Avatar className="h-24 w-24 ring-2 ring-primary ring-offset-2 ring-offset-background">
@@ -262,6 +264,20 @@ export function ProfileEditDialog({ open, onOpenChange }: ProfileEditDialogProps
                     </FormItem>
                   )}
                 />
+
+                {installPrompt && (
+                   <>
+                    <Separator />
+                     <div className="space-y-2">
+                       <FormLabel>App Installation</FormLabel>
+                       <Button variant="outline" className="w-full" onClick={triggerInstall} type="button">
+                         <Download className="mr-2 h-4 w-4" />
+                         Install App on this Device
+                       </Button>
+                       <p className="text-xs text-muted-foreground">Install KlinRex on your home screen for easy access, just like a native app.</p>
+                     </div>
+                   </>
+                )}
               </div>
             </ScrollArea>
             <DialogFooter className="sm:justify-between pt-4">

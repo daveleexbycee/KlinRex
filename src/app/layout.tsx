@@ -4,6 +4,7 @@ import './globals.css';
 import { AppLayout } from '@/components/layout/app-layout';
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from '@/contexts/auth-context';
+import { PWAInstallProvider } from '@/contexts/pwa-install-context';
 
 const inter = Inter({
   variable: '--font-inter',
@@ -35,10 +36,12 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} ${roboto_mono.variable} antialiased`}>
         <AuthProvider>
-          <AppLayout>
-            {children}
-          </AppLayout>
-          <Toaster />
+          <PWAInstallProvider>
+            <AppLayout>
+              {children}
+            </AppLayout>
+            <Toaster />
+          </PWAInstallProvider>
         </AuthProvider>
       </body>
     </html>

@@ -93,6 +93,24 @@ body {
   .pwa-body-padding {
     padding-bottom: calc(60px + env(safe-area-inset-bottom));
   }
+
+  /* --- Custom Scrollbar --- */
+  ::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+  }
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--secondary));
+    border-radius: 10px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--primary) / 0.8);
+    border-radius: 10px;
+    border: 3px solid hsl(var(--secondary));
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--primary));
+  }
 }
 
 /* --- Medical Connection Icon Animation --- */
