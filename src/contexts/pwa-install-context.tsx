@@ -28,7 +28,7 @@ export const PWAInstallProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
-      setInstallPrompt(e as BeforeInstallallPromptEvent);
+      setInstallPrompt(e as BeforeInstallPromptEvent);
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
