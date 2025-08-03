@@ -3,9 +3,9 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { HeartPulse, Settings, LogOut, UserCircle2, Loader2, FileText } from 'lucide-react';
+import { HeartPulse, Settings, LogOut, UserCircle2, Loader2, FileText, LayoutDashboard } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
@@ -32,6 +32,7 @@ const navItems = [
 
 export function DesktopHeader() {
   const pathname = usePathname();
+  const router = useRouter();
   const { user, loading, logout } = useAuth();
   const [isLoginDialogOpen, setIsLoginDialogOpen] = useState(false);
   const [isSignupDialogOpen, setIsSignupDialogOpen] = useState(false);
@@ -64,6 +65,7 @@ export function DesktopHeader() {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
              <DropdownMenuItem onSelect={() => router.push('/')}>
+              <LayoutDashboard className="mr-2 h-4 w-4" />
               Dashboard
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => setIsProfileEditDialogOpen(true)}>
@@ -103,11 +105,14 @@ export function DesktopHeader() {
     <>
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur-sm">
         <div className="container flex h-16 items-center">
-          <Link href="/" className="mr-6 flex items-center space-x-2">
-            <HeartPulse className="h-7 w-7 text-primary" />
-            <span className="font-bold text-lg">KlinRex</span>
-          </Link>
-          <nav className="hidden md:flex flex-1 items-center space-x-6 text-sm font-medium">
+          <div className="mr-auto flex items-center">
+            <Link href="/" className="mr-6 flex items-center space-x-2">
+                <HeartPulse className="h-7 w-7 text-primary" />
+                <span className="font-bold text-lg">KlinRex</span>
+            </Link>
+          </div>
+          
+          <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
             {navItems.map((item) => (
               <Link
                 key={item.href}
@@ -121,7 +126,8 @@ export function DesktopHeader() {
               </Link>
             ))}
           </nav>
-          <div className="flex flex-1 items-center justify-end space-x-4">
+
+          <div className="ml-auto flex items-center justify-end">
              <div className="hidden md:flex">
                 <UserProfileSection />
             </div>

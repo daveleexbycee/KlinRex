@@ -2,21 +2,19 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { HeartPulse, LayoutDashboard, Hospital, Pill, FileText } from 'lucide-react';
-import { usePathname } from 'next/navigation';
-import { useAuth } from '@/contexts/auth-context';
-import { MedicalConnectionIcon } from '@/components/ai/FloatingAIButton';
+import type { LucideIcon } from 'lucide-react';
 import { usePwa } from '@/hooks/use-pwa';
 import { BottomNavBar } from './bottom-nav-bar';
 import { DesktopHeader } from './desktop-header';
+import { MedicalConnectionIcon } from '@/components/ai/FloatingAIButton';
+import { HeartPulse, LayoutDashboard, Hospital, Pill } from 'lucide-react';
+
 
 const navItems = [
-  { href: '/', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/medical-history', label: 'Medical History', icon: HeartPulse },
+  { href: '/medical-history', label: 'History', icon: HeartPulse },
   { href: '/visits', label: 'Visits', icon: Hospital },
-  { href: '/medications', label: 'Medications', icon: Pill },
-  { href: '/ai-assistant', label: 'AI Assistant', icon: MedicalConnectionIcon },
+  { href: '/medications', label: 'Meds', icon: Pill },
+  { href: '/ai-assistant', label: 'AI', icon: MedicalConnectionIcon },
 ];
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
@@ -59,7 +57,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       ) : (
         <div className="flex flex-col min-h-screen">
             <DesktopHeader />
-            <main className="flex-1 container py-6 md:py-8">
+            <main className="flex-1 container py-6 md:py-8 px-4 md:px-8">
                 {children}
             </main>
         </div>
