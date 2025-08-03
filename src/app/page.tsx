@@ -4,7 +4,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { Activity, ArrowRight, FileText, HeartPulse, Hospital, Pill, BriefcaseMedical, Stethoscope, FlaskConical } from "lucide-react"; // Added more medical icons
+import { Activity, ArrowRight, FileText, HeartPulse, Hospital, Pill, BriefcaseMedical, Stethoscope, FlaskConical, Download } from "lucide-react"; // Added Download icon
 import Link from "next/link";
 import Image from "next/image";
 
@@ -18,9 +18,20 @@ const MEDICAL_ICONS = [
   { Icon: FlaskConical, key: 'flask' },
 ];
 
+interface BeforeInstallPromptEvent extends Event {
+  readonly platforms: Array<string>;
+  readonly userChoice: Promise<{
+    outcome: 'accepted' | 'dismissed',
+    platform: string,
+  }>;
+  prompt(): Promise<void>;
+}
+
+
 export default function DashboardPage() {
   const [showIntro, setShowIntro] = useState(true);
   const [isClient, setIsClient] = useState(false);
+  const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
 
   useEffect(() => {
     setIsClient(true); // Component has mounted on the client
@@ -29,10 +40,33 @@ export default function DashboardPage() {
       setShowIntro(false);
     }, 4000); // Total intro screen duration
 
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault();
+      setInstallPrompt(e as BeforeInstallPromptEvent);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
     return () => {
       clearTimeout(introTimer);
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     };
   }, []);
+
+  const handleInstallClick = () => {
+    if (!installPrompt) {
+      return;
+    }
+    installPrompt.prompt();
+    installPrompt.userChoice.then((choiceResult) => {
+      if (choiceResult.outcome === 'accepted') {
+        console.log('User accepted the install prompt');
+      } else {
+        console.log('User dismissed the install prompt');
+      }
+      setInstallPrompt(null);
+    });
+  };
 
   if (showIntro) {
     return (
@@ -128,11 +162,19 @@ export default function DashboardPage() {
             KlinRex helps you keep a comprehensive record of your health, from medical history and hospital visits to medications. 
             Use our KlinRex AI (via the floating button) to get health insights and easily export your data when needed.
           </p>
-          <Button asChild className="mt-6" size="lg">
-            <Link href="/medical-history">
-              Get Started <ArrowRight className="ml-2 h-5 w-5" />
-            </Link>
-          </Button>
+          <div className="flex flex-wrap items-center gap-4 mt-6">
+            <Button asChild size="lg">
+              <Link href="/medical-history">
+                Get Started <ArrowRight className="ml-2 h-5 w-5" />
+              </Link>
+            </Button>
+            {installPrompt && (
+              <Button onClick={handleInstallClick} size="lg" variant="outline">
+                <Download className="mr-2 h-5 w-5" />
+                Install App
+              </Button>
+            )}
+          </div>
         </CardContent>
       </Card>
 
