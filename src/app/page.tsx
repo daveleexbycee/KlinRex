@@ -7,9 +7,11 @@ import { ArrowRight, Download, HeartPulse } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePWAInstall } from '@/contexts/pwa-install-context';
+import { useAuth } from '@/contexts/auth-context';
 
 export default function LandingPage() {
   const { installPrompt, triggerInstall } = usePWAInstall();
+  const { user } = useAuth();
 
   const handleInstallClick = () => {
     triggerInstall();
@@ -35,7 +37,7 @@ export default function LandingPage() {
                 Get Started <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>
-            {installPrompt && (
+            {!user && installPrompt && (
               <Button size="lg" variant="outline" onClick={handleInstallClick}>
                 <Download className="mr-2 h-5 w-5" />
                 Install App

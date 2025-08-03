@@ -265,7 +265,7 @@ export function ProfileEditDialog({ open, onOpenChange }: ProfileEditDialogProps
                   )}
                 />
 
-                {installPrompt && (
+                {user && installPrompt && (
                    <>
                     <Separator />
                      <div className="space-y-2">
