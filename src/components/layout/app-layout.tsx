@@ -11,7 +11,7 @@ import { HeartPulse, LayoutDashboard, Hospital, Pill } from 'lucide-react';
 
 
 const navItems = [
-  { href: '/medical-history', label: 'History', icon: HeartPulse },
+  { href: '/medical-history', label: 'Medicals', icon: HeartPulse },
   { href: '/visits', label: 'Visits', icon: Hospital },
   { href: '/medications', label: 'Meds', icon: Pill },
   { href: '/ai-assistant', label: 'AI', icon: MedicalConnectionIcon },

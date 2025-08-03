@@ -23,10 +23,10 @@ import { ProfileEditDialog } from '@/components/auth/ProfileEditDialog';
 import { ThemeToggleButton } from '@/components/theme-toggle-button';
 
 const navItems = [
-  { href: '/medical-history', label: 'Medical History' },
+  { href: '/medical-history', label: 'Medicals' },
   { href: '/visits', label: 'Visits' },
   { href: '/medications', label: 'Medications' },
-  { href: '/ai-assistant', label: 'AI Assistant' },
+  { href: '/ai-assistant', label: 'AI' },
   { href: '/export', label: 'Export' },
 ];
 
@@ -105,7 +105,7 @@ export function DesktopHeader() {
     <>
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur-sm">
         <div className="container flex h-16 items-center px-4 md:px-8">
-          <div className="flex-1 flex justify-start">
+          <div className="flex-1 flex justify-start pl-4 md:pl-0">
             <Link href="/" className="flex items-center space-x-2">
                 <HeartPulse className="h-7 w-7 text-primary" />
                 <span className="font-bold text-lg">KlinRex</span>
