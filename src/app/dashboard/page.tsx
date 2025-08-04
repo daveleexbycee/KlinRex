@@ -25,25 +25,26 @@ export default function DashboardPage() {
     setIsLoadingReminders(true);
     try {
       const medicationsCollectionRef = collection(db, "users", user.uid, "medications");
-      const q = query(
-        medicationsCollectionRef,
-        where("reminders", "==", true),
-        orderBy("name", "asc")
-      );
-      const querySnapshot = await getDocs(q);
-      const allReminderMeds = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as MedicationItem));
+      // Fetch all medications and filter/sort on the client.
+      // This avoids the need for a composite index in Firestore.
+      const querySnapshot = await getDocs(medicationsCollectionRef);
       
+      const allMeds = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as MedicationItem));
+      
+      const reminderMeds = allMeds.filter(med => med.reminders === true);
+
       const today = new Date();
-      const activeReminders = allReminderMeds.filter(med => {
-        // Ensure start and end dates exist before trying to parse them
-        if (!med.startDate) return false; // Or handle as needed if no start date means it's always active
+      const activeReminders = reminderMeds.filter(med => {
+        if (!med.startDate) return false;
         
         const startDate = parseISO(med.startDate);
-        // If there's an end date, use it; otherwise, use today to make the interval valid for checking.
         const endDate = med.endDate ? parseISO(med.endDate) : endOfDay(today);
         
         return isWithinInterval(today, { start: startOfDay(startDate), end: endOfDay(endDate) });
       });
+
+      // Sort by name client-side
+      activeReminders.sort((a, b) => a.name.localeCompare(b.name));
 
       setReminders(activeReminders);
     } catch (error) {
