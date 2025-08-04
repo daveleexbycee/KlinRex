@@ -6,6 +6,7 @@ import type { LucideIcon } from 'lucide-react';
 import { usePwa } from '@/hooks/use-pwa';
 import { BottomNavBar } from './bottom-nav-bar';
 import { DesktopHeader } from './desktop-header';
+import { MobileHeader } from './mobile-header'; // Import the new mobile header
 import { MedicalConnectionIcon } from '@/components/ai/FloatingAIButton';
 import { HeartPulse, LayoutDashboard, Hospital, Pill } from 'lucide-react';
 
@@ -50,7 +51,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     <>
       {isPwa ? (
         <>
-            <main className="flex-1 p-4 md:p-6 lg:p-8">
+            <MobileHeader /> 
+            <main className="flex-1 p-4 md:p-6 lg:p-8 pt-20">
                 {children}
             </main>
             <BottomNavBar navItems={navItems} />
