@@ -21,10 +21,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth, type UserProfileUpdateData, type KlinRexUser } from '@/contexts/auth-context';
-import { Loader2, UserCircle2, Edit3, UploadCloud, Download } from 'lucide-react';
+import { Loader2, UserCircle2, Edit3, UploadCloud, Download, BellRing } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { usePWAInstall } from '@/contexts/pwa-install-context';
 import { Separator } from '@/components/ui/separator';
+import { requestNotificationPermission } from '@/lib/firebase/messaging';
+import { useToast } from '@/hooks/use-toast';
 
 
 const profileEditSchema = z.object({
@@ -53,6 +55,7 @@ export function ProfileEditDialog({ open, onOpenChange }: ProfileEditDialogProps
   const [isLoading, setIsLoading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const form = useForm<ProfileEditFormValues>({
     resolver: zodResolver(profileEditSchema),
@@ -100,6 +103,15 @@ export function ProfileEditDialog({ open, onOpenChange }: ProfileEditDialogProps
       reader.readAsDataURL(file);
     }
   };
+
+  const handleEnableNotifications = async () => {
+    if (!user) {
+       toast({ title: "Error", description: "You must be logged in.", variant: "destructive" });
+       return;
+    }
+    await requestNotificationPermission(user.uid);
+    toast({ title: "Notifications", description: "Check your browser to grant permission." });
+  }
 
   const onSubmit: SubmitHandler<ProfileEditFormValues> = async (data) => {
     setIsLoading(true);
@@ -264,12 +276,20 @@ export function ProfileEditDialog({ open, onOpenChange }: ProfileEditDialogProps
                     </FormItem>
                   )}
                 />
+                 
+                <Separator />
+                 <div className="space-y-2">
+                   <FormLabel>App & Notification Settings</FormLabel>
+                    <Button variant="outline" className="w-full" onClick={handleEnableNotifications} type="button" disabled={!user}>
+                         <BellRing className="mr-2 h-4 w-4" />
+                         Enable Notifications
+                    </Button>
+                    <p className="text-xs text-muted-foreground">Enable push notifications for medication reminders on this device.</p>
+                 </div>
 
                 {user && installPrompt && (
                    <>
-                    <Separator />
                      <div className="space-y-2">
-                       <FormLabel>App Installation</FormLabel>
                        <Button variant="outline" className="w-full" onClick={triggerInstall} type="button">
                          <Download className="mr-2 h-4 w-4" />
                          Install App on this Device

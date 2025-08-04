@@ -1,4 +1,3 @@
-
 // src/contexts/auth-context.tsx
 "use client";
 
@@ -19,6 +18,8 @@ import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
+import { requestNotificationPermission } from '@/lib/firebase/messaging';
+
 
 // Extended User type
 export interface KlinRexUser extends FirebaseUser {
@@ -26,6 +27,7 @@ export interface KlinRexUser extends FirebaseUser {
   bloodType?: string;
   emergencyContact?: string;
   address?: string;
+  fcmToken?: string;
 }
 
 export interface EmailPasswordCredentials {
@@ -70,7 +72,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (userProfileSnap.exists()) {
           customData = userProfileSnap.data();
         }
-        setUser({ ...firebaseUser, ...customData } as KlinRexUser);
+        const combinedUser = { ...firebaseUser, ...customData } as KlinRexUser
+        setUser(combinedUser);
+        // Once user is loaded, try to get notification permission
+        if (combinedUser && !combinedUser.fcmToken) {
+           console.log("Requesting notification permission on login...");
+           requestNotificationPermission(combinedUser.uid);
+        }
       } else {
         setUser(null);
       }
@@ -79,7 +87,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => unsubscribe();
   }, []);
 
-  const handleAuthSuccess = () => {
+  const handleAuthSuccess = (uid: string) => {
     toast({ title: "Success", description: "Logged in successfully!" });
     router.push('/dashboard');
   };
@@ -137,9 +145,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setLoading(true);
     try {
       const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
-      // onAuthStateChanged will handle the rest, but we can redirect here
-      handleAuthSuccess();
+      const result = await signInWithPopup(auth, provider);
+      handleAuthSuccess(result.user.uid);
     } catch (error) {
       handleAuthError(error as AuthError, "Could not sign in with Google. Please try again.");
     } finally {
@@ -150,8 +157,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const loginWithEmailPassword = async ({ email, password }: EmailPasswordCredentials): Promise<boolean> => {
     setLoading(true);
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      handleAuthSuccess();
+      const result = await signInWithEmailAndPassword(auth, email, password);
+      handleAuthSuccess(result.user.uid);
       return true;
     } catch (error) {
       handleAuthError(error as AuthError, "Could not sign in with email/password. Please try again.");
@@ -167,7 +174,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       // Create an empty profile in Firestore for the new user
       const userProfileRef = doc(db, "userProfiles", userCredential.user.uid);
       await setDoc(userProfileRef, { email: userCredential.user.email });
-      handleAuthSuccess();
+      handleAuthSuccess(userCredential.user.uid);
       return true;
     } catch (error) {
       handleAuthError(error as AuthError, "Could not create account. Please try again.");
