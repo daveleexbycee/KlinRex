@@ -22,8 +22,8 @@ export const metadata: Metadata = {
   description: 'KlinRex: Your personal health organizer.',
   manifest: '/manifest.json',
   icons: {
-    icon: '/favicon.ico', // Points to public/favicon.ico
-    apple: '/icons/icon-192x192.svg',
+    icon: '/icon.png', 
+    apple: '/icon.png',
   },
 };
 
