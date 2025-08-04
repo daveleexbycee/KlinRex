@@ -5,6 +5,7 @@ import { AppLayout } from '@/components/layout/app-layout';
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from '@/contexts/auth-context';
 import { PWAInstallProvider } from '@/contexts/pwa-install-context';
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const inter = Inter({
   variable: '--font-inter',
@@ -43,6 +44,7 @@ export default function RootLayout({
             <Toaster />
           </PWAInstallProvider>
         </AuthProvider>
+        <SpeedInsights />
       </body>
     </html>
   );
