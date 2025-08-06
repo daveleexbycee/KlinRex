@@ -38,11 +38,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   if (!isClient) {
     // Render a skeleton or loader to avoid layout shifts and hydration errors
     return (
-        <div className="flex flex-col h-screen">
-          <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur-sm">
-             <div className="container flex h-16 items-center"></div>
-          </header>
-          <main className="flex-1"></main>
+        <div className="flex flex-col h-screen items-center justify-center bg-background">
+          <HeartPulse className="h-20 w-20 text-primary animate-heart-pulse" />
         </div>
     );
   }

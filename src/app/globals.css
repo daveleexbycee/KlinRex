@@ -125,3 +125,17 @@ body {
   stroke-dashoffset: 40;
   animation: medicalConnectionDash 1.5s ease-in-out infinite alternate;
 }
+
+/* Pulsing Heart Animation */
+@keyframes heart-pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.animate-heart-pulse {
+  animation: heart-pulse 1.5s ease-in-out infinite;
+}
