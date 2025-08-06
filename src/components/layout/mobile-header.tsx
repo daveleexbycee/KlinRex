@@ -37,7 +37,7 @@ export function MobileHeader() {
       <header className="fixed top-0 left-0 right-0 z-50 border-b bg-background/95 backdrop-blur-sm">
         <div className="container flex h-16 items-center justify-between px-4">
           <Link href="/" className="flex items-center gap-2 font-semibold">
-            <HeartPulse className="h-7 w-7 text-primary" />
+            <HeartPulse className="h-6 w-6 text-primary" />
             <span className="font-bold text-lg">KlinRex</span>
           </Link>
           

@@ -45,7 +45,7 @@ export default function LandingPage() {
       <section className="container grid lg:grid-cols-2 gap-12 items-center py-12 md:py-24">
         <div className="flex flex-col items-start space-y-6">
           <span className="text-primary font-semibold tracking-wider uppercase text-sm">
-            PERSONAL HEALTH SITE
+            PERSONAL HEALTH APP
           </span>
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold !leading-tight text-foreground">
             A modern way <br />
